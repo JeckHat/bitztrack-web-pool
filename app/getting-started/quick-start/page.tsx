@@ -4,7 +4,7 @@ export default function Page() {
       <div className="min-h-[100vh] flex-1 rounded-xl bg-stone-100/50 md:min-h-min dark:bg-stone-800/50">
         <h1>Quickstart</h1>
         <h4>
-          Get started mining on the Ec1ipse Mining Pool easily and quickly by
+          Get started mining on the Coal Mining Pool easily and quickly by
           following these few steps!
         </h4>
         Step 0: Install Rust

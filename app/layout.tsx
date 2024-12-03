@@ -1,16 +1,12 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { ModeToggle } from "@/components/mode-toggle";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
-import localFont from "next/font/local";
-import "./globals.css";
-import { NavigationBreadcrumbs } from "@/components/navigation-breadcrumbs";
+import { AppSidebar } from '@/components/app-sidebar'
+import { ModeToggle } from '@/components/mode-toggle'
+import { Separator } from '@/components/ui/separator'
+import { SidebarInset, SidebarProvider, SidebarTrigger, } from '@/components/ui/sidebar'
+import type { Metadata } from 'next'
+import { ThemeProvider } from 'next-themes'
+import localFont from 'next/font/local'
+import './globals.css'
+import { NavigationBreadcrumbs } from '@/components/navigation-breadcrumbs'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -47,7 +43,7 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-              <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+              <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 sticky top-0 bg-background">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
                 <NavigationBreadcrumbs />

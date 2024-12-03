@@ -1,13 +1,14 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { Button } from '../components/ui/button'
 import Link from 'next/link'
+import { Card } from '../components/ui/card'
 
 export default function Page() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4">
       {/* Hero Section */}
-      <div className="flex-1 rounded-xl bg-gradient-to-b from-gray-900 via-stone-800 to-black py-10">
+      <Card className="py-10 flex-1">
         <div className="container mx-auto px-4 h-full text-white">
           <header className="text-center">
             <h1 className="text-5xl font-extrabold mb-4">Welcome to the COAL + ORE Mining Pool</h1>
@@ -69,7 +70,7 @@ export default function Page() {
             </Tabs.Content>
           </Tabs.Root>
         </div>
-      </div>
+      </Card>
 
       {/* Get Started Section */}
       <section className="text-center py-5">
@@ -91,13 +92,15 @@ export default function Page() {
           href="https://discord.gg/p9V24cMNn6" // Replace with your actual Discord link
           target="_blank"
           rel="noopener noreferrer"
-          className="aspect-video flex flex-col justify-center items-center rounded-xl bg-stone-100/50 dark:bg-stone-800/50 p-4 group"
         >
+          <Card
+            className="aspect-video flex flex-col justify-center items-center group">
           <img src="/images/discord-logo.svg" alt="Discord" className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"/>
           <h3 className="text-xl font-bold text-center">Join Our Discord</h3>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
             Connect with the community and get the latest updates.
           </p>
+          </Card>
         </a>
 
         {/* GitHub Link */}
@@ -105,13 +108,15 @@ export default function Page() {
           href="https://github.com/shinyst-shiny" // Replace with your actual GitHub repo link
           target="_blank"
           rel="noopener noreferrer"
-          className="aspect-video flex flex-col justify-center items-center rounded-xl bg-stone-100/50 dark:bg-stone-800/50 p-4 group"
         >
+          <Card
+            className="aspect-video flex flex-col justify-center items-center group">
           <img src="/images/github-logo.svg" alt="GitHub" className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"/>
           <h3 className="text-xl font-bold text-center">Explore on GitHub</h3>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
             View our open-source code and contribute to the project.
           </p>
+          </Card>
         </a>
 
         <div className="flex flex-col md:flex-row gap-4">
@@ -120,8 +125,10 @@ export default function Page() {
             href="https://minechain.gg" // Replace with the actual COAL website URL
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex flex-col justify-center items-center rounded-xl bg-stone-100/50 dark:bg-stone-800/50 p-4 group"
+            className="flex-1 flex"
           >
+            <Card
+              className="flex-1 flex flex-col justify-center items-center group">
               <img
                 src="/images/coal-logo.png" // Replace with the COAL logo path
                 alt="COAL Logo"
@@ -131,6 +138,7 @@ export default function Page() {
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Learn more about the minechain.
               </p>
+            </Card>
           </a>
 
           {/* ORE Official Website */}
@@ -138,8 +146,10 @@ export default function Page() {
             href="https://ore.supply" // Replace with the actual ORE website URL
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-1 flex flex-col justify-center items-center rounded-xl bg-stone-100/50 dark:bg-stone-800/50 p-4 group"
+            className="flex-1 flex"
           >
+            <Card
+              className="flex-1 flex flex-col justify-center items-center group">
               <img
                 src="/images/ore-logo.png" // Replace with the ORE logo path
                 alt="ORE Logo"
@@ -149,6 +159,7 @@ export default function Page() {
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Learn more about the Solana digital gold.
               </p>
+              </Card>
           </a>
         </div>
 

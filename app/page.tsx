@@ -8,8 +8,8 @@ export default function Page() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4">
       {/* Hero Section */}
-      <Card className="py-10 flex-1">
-        <div className="container mx-auto px-4 h-full text-white">
+      <Card className="py-10 flex-1 bg-gradient-to-b from-gray-100 via-stone-100 to-white dark:from-gray-900 dark:via-stone-800 dark:to-black">
+        <div className="container mx-auto px-4 h-full ">
           <header className="text-center">
             <h1 className="text-5xl font-extrabold mb-4">Welcome to the COAL + ORE Mining Pool</h1>
             <p className="text-xl font-light">Your Gateway to Efficient, Multi-Token Crypto Mining on Solana</p>
@@ -95,11 +95,14 @@ export default function Page() {
         >
           <Card
             className="aspect-video flex flex-col justify-center items-center group">
-          <img src="/images/discord-logo.svg" alt="Discord" className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"/>
-          <h3 className="text-xl font-bold text-center">Join Our Discord</h3>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
-            Connect with the community and get the latest updates.
-          </p>
+            <img src="/images/discord-logo.svg" alt="Discord"
+                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110 hidden dark:block"/>
+            <img src="/images/discord-logo-black.svg" alt="Discord"
+                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110 block dark:hidden"/>
+            <h3 className="text-xl font-bold text-center">Join Our Discord</h3>
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Connect with the community and get the latest updates.
+            </p>
           </Card>
         </a>
 
@@ -111,11 +114,14 @@ export default function Page() {
         >
           <Card
             className="aspect-video flex flex-col justify-center items-center group">
-          <img src="/images/github-logo.svg" alt="GitHub" className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"/>
-          <h3 className="text-xl font-bold text-center">Explore on GitHub</h3>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
-            View our open-source code and contribute to the project.
-          </p>
+            <img src="/images/github-logo.svg" alt="GitHub"
+                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110 hidden dark:block"/>
+            <img src="/images/github-logo-black.svg" alt="GitHub"
+                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110 block dark:hidden"/>
+            <h3 className="text-xl font-bold text-center">Explore on GitHub</h3>
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400 mt-2">
+              View our open-source code and contribute to the project.
+            </p>
           </Card>
         </a>
 
@@ -129,14 +135,15 @@ export default function Page() {
           >
             <Card
               className="flex-1 flex flex-col justify-center items-center group">
-              <img
-                src="/images/coal-logo.png" // Replace with the COAL logo path
-                alt="COAL Logo"
-                className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"
-              />
-              <h3 className="text-2xl font-bold">COAL Official Website</h3>
+              <div className="p-1 bg-black rounded-full w-16 h-16 mb-4 transition-transform group-hover:scale-110">
+                <img
+                  src="/images/coal-logo.png" // Replace with the COAL logo path
+                  alt="COAL Logo"
+                />
+              </div>
+              <h3 className="text-2xl font-bold">COAL Website</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Learn more about the minechain.
+                Discover the minechain.
               </p>
             </Card>
           </a>
@@ -155,9 +162,9 @@ export default function Page() {
                 alt="ORE Logo"
                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"
               />
-              <h3 className="text-2xl font-bold">ORE Official Website</h3>
+              <h3 className="text-2xl font-bold">ORE Website</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Learn more about the Solana digital gold.
+                Discorver Solana digital gold.
               </p>
               </Card>
           </a>

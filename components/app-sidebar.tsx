@@ -50,15 +50,18 @@ const data: MenuData[] = [
     items: [
       {
         title: "Pool details",
-        url: "/info/pool-details",
+        // url: "/info/pool-details",
+        url: "/work-in-progress",
       },
       {
         title: "Team",
-        url: "/info/pool-details",
+        // url: "/info/pool-details",
+        url: "/work-in-progress",
       },
       {
         title: "Pool stats",
-        url: "/info/stats",
+        // url: "/info/stats",
+        url: "/work-in-progress",
       },
     ],
   },
@@ -68,23 +71,28 @@ const data: MenuData[] = [
     items: [
       {
         title: "View balance",
-        url: "/miner/balance",
+        // url: "/miner/balance",
+        url: "/work-in-progress",
       },
       {
         title: "View stats",
-        url: "/miner/balance",
+        // url: "/miner/balance",
+        url: "/work-in-progress",
       },
       {
         title: "Claim rewards",
-        url: "/miner/rewards",
+        // url: "/miner/rewards",
+        url: "/work-in-progress",
       },
       {
         title: "Staking",
-        url: "/miner/staking",
+        // url: "/miner/staking",
+        url: "/work-in-progress",
       },
       {
         title: "Web mining",
-        url: "/miner/web-mining",
+        // url: "/miner/web-mining",
+        url: "/work-in-progress",
       },
     ],
   },

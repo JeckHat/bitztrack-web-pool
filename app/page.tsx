@@ -1,7 +1,7 @@
-import * as Tabs from '@radix-ui/react-tabs'
 import { Button } from '../components/ui/button'
 import Link from 'next/link'
 import { Card } from '../components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 
 export default function Page() {
 
@@ -15,29 +15,30 @@ export default function Page() {
             <p className="text-xl font-light">Your Gateway to Efficient, Multi-Token Crypto Mining on Solana</p>
           </header>
 
-          <Tabs.Root defaultValue="overview" className="mt-10">
-            <Tabs.List className="flex space-x-4 justify-center border-b border-gray-700 pb-2">
-              <Tabs.Trigger
+          <Tabs defaultValue="overview" className="mt-10">
+            <div className="flex flex-row w-full justify-center">
+            <TabsList className="min-w-[50%] grid grid-cols-3 h-fit">
+              <TabsTrigger
+                className="text-lg font-medium"
                 value="overview"
-                className="px-4 py-2 text-lg font-medium border-b-2 border-transparent focus:outline-none radix-state-active:border-blue-600 radix-state-active:text-blue-600"
               >
                 Overview
-              </Tabs.Trigger>
-              <Tabs.Trigger
+              </TabsTrigger>
+              <TabsTrigger
+                className="text-lg font-medium"
                 value="features"
-                className="px-4 py-2 text-lg font-medium border-b-2 border-transparent focus:outline-none radix-state-active:border-blue-600 radix-state-active:text-blue-600"
               >
                 Features
-              </Tabs.Trigger>
-              <Tabs.Trigger
+              </TabsTrigger>
+              <TabsTrigger
+                className="text-lg font-medium"
                 value="reprocessing"
-                className="px-4 py-2 text-lg font-medium border-b-2 border-transparent focus:outline-none radix-state-active:border-blue-600 radix-state-active:text-blue-600"
               >
                 Reprocessing
-              </Tabs.Trigger>
-            </Tabs.List>
-
-            <Tabs.Content value="overview" className="mt-6">
+              </TabsTrigger>
+            </TabsList>
+            </div>
+            <TabsContent value="overview" className="mt-6">
               <h2 className="text-3xl font-bold mb-4">What is the COAL + ORE Mining Pool?</h2>
               <p className="text-lg leading-relaxed">
                 The COAL + ORE Mining Pool is an innovative, open-source cryptocurrency mining platform built on the
@@ -46,9 +47,9 @@ export default function Page() {
                 token, <strong>CHROMIUM</strong>, through a
                 cutting-edge system called <strong>Reprocessing</strong>.
               </p>
-            </Tabs.Content>
+            </TabsContent>
 
-            <Tabs.Content value="features" className="mt-6">
+            <TabsContent value="features" className="mt-6">
               <h2 className="text-3xl font-bold mb-4">Why Choose COAL + ORE?</h2>
               <ul className="list-disc list-inside space-y-2">
                 <li><strong>Triple Token Advantage</strong>: Mine COAL, ORE, and CHROMIUM in a single process.</li>
@@ -59,16 +60,16 @@ export default function Page() {
                 </li>
                 <li><strong>Open Source</strong>: Both the client and server software are fully open source.</li>
               </ul>
-            </Tabs.Content>
+            </TabsContent>
 
-            <Tabs.Content value="reprocessing" className="mt-6">
+            <TabsContent value="reprocessing" className="mt-6">
               <h2 className="text-3xl font-bold mb-4">How Reprocessing Works</h2>
               <p className="text-lg leading-relaxed">
                 Reprocessing enhances mining efficiency. By reprocessing mined COAL, the pool unlocks CHROMIUM, a
                 high-value token that adds another layer of profitability to your mining efforts.
               </p>
-            </Tabs.Content>
-          </Tabs.Root>
+            </TabsContent>
+          </Tabs>
         </div>
       </Card>
 

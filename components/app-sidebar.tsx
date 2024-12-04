@@ -73,12 +73,7 @@ const data: MenuData[] = [
     url: "/miner",
     items: [
       {
-        title: "View balance",
-        // url: "/miner/balance",
-        url: "/work-in-progress",
-      },
-      {
-        title: "View stats",
+        title: "Balance & Stats",
         // url: "/miner/balance",
         url: "/work-in-progress",
       },

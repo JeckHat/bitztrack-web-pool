@@ -24,13 +24,13 @@ export function NavigationBreadcrumbs() {
               .join("/");
             return (
               <Fragment key={crumb}>
-                <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbItem className="block">
                   <BreadcrumbLink className="capitalize" href={`/${finalLink}`}>
                     {crumb.replaceAll("-", " ")}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 {index + 1 === array.length ? null : (
-                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbSeparator className="block" />
                 )}
               </Fragment>
             );

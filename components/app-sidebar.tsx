@@ -45,34 +45,42 @@ const data: MenuData[] = [
     ],
   },
   {
-    title: "Basics",
-    url: "/basics",
+    title: "Info",
+    url: "/info",
     items: [
       {
-        title: "View balance",
-        url: "/basics/balance",
-      },
-      {
-        title: "Claim rewards",
-        url: "/basics/rewards",
-      },
-      {
-        title: "Staking",
-        url: "/basics/staking",
-      },
-      {
         title: "Pool details",
-        url: "/basics/pool-details",
+        url: "/info/pool-details",
+      },
+      {
+        title: "Team",
+        url: "/info/pool-details",
+      },
+      {
+        title: "Pool stats",
+        url: "/info/stats",
       },
     ],
   },
   {
-    title: "Live information",
-    url: "/info",
+    title: "Miner",
+    url: "/miner",
     items: [
       {
-        title: "Pool stats",
-        url: "/info/stats",
+        title: "View balance",
+        url: "/miner/balance",
+      },
+      {
+        title: "View stats",
+        url: "/miner/balance",
+      },
+      {
+        title: "Claim rewards",
+        url: "/miner/rewards",
+      },
+      {
+        title: "Staking",
+        url: "/miner/staking",
       },
     ],
   },

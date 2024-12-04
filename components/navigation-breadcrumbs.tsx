@@ -6,6 +6,7 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
+  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { Fragment } from "react";
@@ -22,16 +23,25 @@ export function NavigationBreadcrumbs() {
             const finalLink = array
               .filter((_el, index2) => index >= index2)
               .join("/");
+            const isLast = index + 1 === array.length;
+            const label = crumb.replaceAll("-", " ");
             return (
               <Fragment key={crumb}>
                 <BreadcrumbItem className="block">
-                  <BreadcrumbLink className="capitalize" href={`/${finalLink}`}>
-                    {crumb.replaceAll("-", " ")}
-                  </BreadcrumbLink>
+                  {isLast ? (
+                    <BreadcrumbPage className="capitalize">
+                      {label}
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink
+                      className="capitalize"
+                      href={`/${finalLink}`}
+                    >
+                      {label}
+                    </BreadcrumbLink>
+                  )}
                 </BreadcrumbItem>
-                {index + 1 === array.length ? null : (
-                  <BreadcrumbSeparator className="block" />
-                )}
+                {isLast ? null : <BreadcrumbSeparator className="block" />}
               </Fragment>
             );
           })}

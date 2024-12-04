@@ -82,6 +82,10 @@ const data: MenuData[] = [
         title: "Staking",
         url: "/miner/staking",
       },
+      {
+        title: "Web mining",
+        url: "/miner/web-mining",
+      },
     ],
   },
 ];

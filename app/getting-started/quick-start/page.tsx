@@ -20,7 +20,7 @@ export default function Page() {
             <p>To get started, install the necessary dependencies on your machine by running:</p>
           </CardContent>
           <CardFooter>
-            <pre className="bg-gray-300 dark:bg-gray-900 p-4 rounded-md text-sm overflow-x-auto w-full">
+            <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
               <code>sudo apt install git build-essential libssl-dev pkg-config -y</code>
             </pre>
           </CardFooter>
@@ -33,7 +33,7 @@ export default function Page() {
             <p>You’ll need to install Rust to run the mining client. Use the following command to install Rust:</p>
           </CardContent>
           <CardFooter>
-            <pre className="bg-gray-300 dark:bg-gray-900 p-4 rounded-md text-sm overflow-x-auto w-full">
+            <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
                <code>curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs | sh</code>
             </pre>
           </CardFooter>
@@ -46,7 +46,7 @@ export default function Page() {
             <p>Now that Rust is installed, you can install the COAL + ORE mining client using Cargo:</p>
           </CardContent>
           <CardFooter>
-            <pre className="bg-gray-300 dark:bg-gray-900 p-4 rounded-md text-sm overflow-x-auto w-full">
+            <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
                <code>cargo install coal-pool-client</code>
             </pre>
           </CardFooter>
@@ -60,7 +60,7 @@ export default function Page() {
               the client:</p>
           </CardContent>
           <CardFooter>
-            <pre className="bg-gray-300 dark:bg-gray-900 p-4 rounded-md text-sm overflow-x-auto w-full">
+            <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
                <code>coal-pool-client</code>
             </pre>
           </CardFooter>

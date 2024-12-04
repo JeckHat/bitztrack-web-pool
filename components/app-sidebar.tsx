@@ -21,7 +21,7 @@ interface MenuData {
 
 const data: MenuData[] = [
   {
-    title: "Home",
+    title: "",
     url: "/",
     items: [
       {

@@ -5,10 +5,17 @@ export default function Page() {
     <div className="max-w-4xl mx-auto px-6 py-10">
       <h1 className="text-4xl font-bold text-center mb-8">How to Start Mining in the Pool</h1>
 
-        {/* Step 1: Install Prerequisites */}
+      <div className="text-center mb-6">
+        <p className="text-lg leading-relaxed">
+         Follow these steps in your terminal to get started.
+        </p>
+      </div>
+
+      {/* Step 1: Install Prerequisites */}
       <div className="flex flex-col gap-5">
         <Card className="px-6 py-4">
-          <CardTitle><h2 className="text-2xl font-semibold mb-4">1. Install the Prerequisite Dependencies</h2></CardTitle>
+          <CardTitle><h2 className="text-2xl font-semibold mb-4">1. Install the Prerequisite Dependencies</h2>
+          </CardTitle>
           <CardContent>
             <p>To get started, install the necessary dependencies on your machine by running:</p>
           </CardContent>
@@ -49,7 +56,8 @@ export default function Page() {
         <Card className="px-6 py-4">
           <CardTitle><h2 className="text-2xl font-semibold mb-4">4. Start Mining!</h2></CardTitle>
           <CardContent>
-            <p>Once the mining client is installed, you&#39;re ready to start mining. Run the following command to start the client:</p>
+            <p>Once the mining client is installed, you&#39;re ready to start mining. Run the following command to start
+              the client:</p>
           </CardContent>
           <CardFooter>
             <pre className="bg-gray-300 dark:bg-gray-900 p-4 rounded-md text-sm overflow-x-auto w-full">
@@ -62,7 +70,8 @@ export default function Page() {
         <Card className="px-6 py-4">
           <CardTitle><h2 className="text-2xl font-semibold mb-4">5. Create Your Wallet</h2></CardTitle>
           <CardContent>
-            <p>When you launch the <code>coal-pool-client</code> command, you’ll be prompted to create a wallet. Choose the <strong>&#34;Generate Keypair&#34;</strong> option to generate your wallet keypair.</p>
+            <p>When you launch the <code>coal-pool-client</code> command, you’ll be prompted to create a wallet. Choose
+              the <strong>&#34;Generate Keypair&#34;</strong> option to generate your wallet keypair.</p>
           </CardContent>
         </Card>
 
@@ -70,7 +79,8 @@ export default function Page() {
         <Card className="px-6 py-4">
           <CardTitle><h2 className="text-2xl font-semibold mb-4">6. Sign Up for the Pool</h2></CardTitle>
           <CardContent>
-            <p>After generating your keypair, use the <strong>&#34;Sign Up&#34;</strong> option to register your keypair with the pool.</p>
+            <p>After generating your keypair, use the <strong>&#34;Sign Up&#34;</strong> option to register your keypair
+              with the pool.</p>
           </CardContent>
         </Card>
 

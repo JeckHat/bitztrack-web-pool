@@ -1,4 +1,4 @@
-import * as React from "react";
+import * as React from 'react'
 
 import {
   Sidebar,
@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar'
 
 interface MenuData {
   title: string;
@@ -37,6 +37,10 @@ const data: MenuData[] = [
       {
         title: "Quick start",
         url: "/getting-started/quick-start",
+      },
+      {
+        title: "Advanced mining",
+        url: "/getting-started/advanced-mining",
       },
     ],
   },

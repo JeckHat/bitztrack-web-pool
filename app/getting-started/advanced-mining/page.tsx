@@ -12,7 +12,7 @@ export default function Page() {
           Optimize your mining performance using the <strong>Orion Client</strong>, which supports both CPU and GPU mining.
           <br/>Follow these steps to get started.
         </p>
-        <Link href="https://github.com/SL-x-TnT/OrionClientt" passHref>
+        <Link href="https://github.com/SL-x-TnT/OrionClient" target="_blank">
           <Button size="lg" className="mt-3">
             <strong>DOWNLOAD ORION CLIENT</strong>
           </Button>

@@ -59,7 +59,7 @@ const data: MenuData[] = [
       {
         title: "Team",
         // url: "/info/pool-details",
-        url: "/work-in-progress",
+        url: "/info/team",
       },
       {
         title: "Pool stats",

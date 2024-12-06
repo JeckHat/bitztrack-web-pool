@@ -90,7 +90,7 @@ export default function Page() {
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
         {/* Discord Link */}
         <a
-          href="https://discord.gg/p9V24cMNn6" // Replace with your actual Discord link
+          href="https://discord.gg/p9V24cMNn6"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -109,7 +109,7 @@ export default function Page() {
 
         {/* GitHub Link */}
         <a
-          href="https://github.com/shinyst-shiny" // Replace with your actual GitHub repo link
+          href="https://github.com/shinyst-shiny"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -129,7 +129,7 @@ export default function Page() {
         <div className="flex flex-col md:flex-row gap-4">
           {/* COAL Official Website */}
           <a
-            href="https://minechain.gg" // Replace with the actual COAL website URL
+            href="https://minechain.gg"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex"
@@ -138,20 +138,20 @@ export default function Page() {
               className="flex-1 flex flex-col justify-center items-center group">
               <div className="p-1 bg-black rounded-full w-16 h-16 mb-4 transition-transform group-hover:scale-110">
                 <img
-                  src="/images/coal-logo.png" // Replace with the COAL logo path
+                  src="/images/coal-logo.png"
                   alt="COAL Logo"
                 />
               </div>
               <h3 className="text-2xl font-bold">COAL Website</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Discover the minechain.
+                The minechain.
               </p>
             </Card>
           </a>
 
           {/* ORE Official Website */}
           <a
-            href="https://ore.supply" // Replace with the actual ORE website URL
+            href="https://ore.supply"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 flex"
@@ -159,13 +159,13 @@ export default function Page() {
             <Card
               className="flex-1 flex flex-col justify-center items-center group">
               <img
-                src="/images/ore-logo.png" // Replace with the ORE logo path
+                src="/images/ore-logo.png"
                 alt="ORE Logo"
                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"
               />
               <h3 className="text-2xl font-bold">ORE Website</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Discorver Solana digital gold.
+                Solana digital gold.
               </p>
               </Card>
           </a>

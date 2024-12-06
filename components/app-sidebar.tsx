@@ -45,6 +45,10 @@ const data: MenuData[] = [
         title: "Advanced mining",
         url: "/getting-started/advanced-mining",
       },
+      {
+        title: "Mobile mining",
+        url: "/getting-started/mobile-mining",
+      },
     ],
   },
   {

@@ -103,7 +103,7 @@ export default function Page() {
 
         {/* Final Section */}
         <div className="text-center">
-          <h2 className="text-2xl font-semibold mb-4">Congratulations! 🎉</h2>
+          <h2 className="text-2xl font-semibold mb-4">You&#39;re All Set! 🎉</h2>
           <p className="text-lg mb-6">
             You&#39;re now mining COAL and ORE with the pool! Keep an eye on your mining progress and rewards.
           </p>

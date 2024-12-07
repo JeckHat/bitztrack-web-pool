@@ -57,8 +57,7 @@ const data: MenuData[] = [
     items: [
       {
         title: "Pool details",
-        // url: "/info/pool-details",
-        url: "/work-in-progress",
+        url: "/info/pool-details",
       },
       {
         title: "Team",

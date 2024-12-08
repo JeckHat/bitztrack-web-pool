@@ -86,9 +86,8 @@ const data: MenuData[] = [
         url: "/work-in-progress",
       },
       {
-        title: "Staking",
-        // url: "/miner/staking",
-        url: "/work-in-progress",
+        title: "Stake COAL",
+        url: "/miner/stake-coal",
       },
       {
         title: "Web mining",

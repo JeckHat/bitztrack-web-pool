@@ -6,6 +6,31 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+.custom-wallet-button {
+  /* Override wallet adapter button styles */
+
+  .wallet-adapter-button {
+    background-color: transparent !important;
+    border: none !important;
+    color: inherit !important;
+    font-family: inherit !important;
+    font-size: inherit !important;
+    font-weight: inherit !important;
+    height: auto !important;
+    line-height: inherit !important;
+    padding: 0 !important;
+  }
+
+  .wallet-adapter-button:hover {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+
+  .wallet-adapter-button-trigger {
+    background-color: transparent !important;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

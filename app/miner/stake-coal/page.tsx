@@ -192,6 +192,10 @@ export default function StakingPage () {
               <div className="bg-muted p-4 rounded-md mb-6">
                 <h3 className="text-lg font-semibold mb-2">Benefits of Staking LP to the Guild</h3>
                 <ul className="list-disc list-inside mb-2">
+                  <li><strong>0 transactions fees</strong> are required to stake, they are payed by the pool.</li>
+                  <li>A small fee to create the guild personal account may be added <strong>the first time</strong> from
+                    Solana.
+                  </li>
                   <li>Adds a multiplier for <strong>every COAL we mine</strong>, benefiting all miners.</li>
                   <li>Creates <strong>passive returns</strong> for LP stakers from a portion of mining earnings.</li>
                   <li>Staking is <strong>not required</strong> to get the bonus, but provides additional passive
@@ -278,6 +282,7 @@ export default function StakingPage () {
               <div className="bg-muted p-4 rounded-md mb-6">
                 <h3 className="text-lg font-semibold mb-2">Benefits of Staking COAL to the Pool</h3>
                 <ul className="list-disc list-inside mb-2">
+                  <li><strong>0 transactions fees</strong> are required to stake, they are payed by the pool.</li>
                   <li>Adds a multiplier for <strong>every COAL we mine</strong>, benefiting all miners.</li>
                   <li>Helps the Pool to reach and maintain the maximum 2x multiplier to distributes more rewards.</li>
                   <li>Staking is <strong>not required</strong> to get the bonus but helps you and other miners to get

@@ -41,7 +41,6 @@ export async function stakeToGuild (
       needsToAddDelegation = true
     } else if (checkMemberResponse.status === 302) {
       console.log('Member already in the guild but no delegation needed')
-      needsToAddDelegation = false
     } else {
       throw new Error('Error while checking member status')
     }
@@ -49,6 +48,17 @@ export async function stakeToGuild (
     console.log('error', error)
     if (typeof error === 'object' && error instanceof AxiosError && error.status === 302) {
       console.log('Member already in the guild')
+    } else if (typeof error === 'object' && error instanceof AxiosError && error.status === 404) {
+      needsToAddDelegation = true
+      console.log('Member without data')
+      const newMemberInstructionResponse = await axios.get(`${POOL_SERVER}/guild/new-member-instruction?pubkey=${userPublicKey.toString()}`)
+      if (newMemberInstructionResponse.status === 200) {
+        const jsonInstruction: string = JSON.stringify(newMemberInstructionResponse.data)
+        const instruction = await deserializeInstructionFromJson(jsonInstruction)
+        instructions.push(instruction)
+      } else {
+        throw new Error('Error while creating new member instruction')
+      }
     } else {
       throw new Error('Error while checking member status')
     }

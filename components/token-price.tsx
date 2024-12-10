@@ -44,7 +44,9 @@ const TokenPrice: React.FC<TokenPriceProps> = ({ tokenId, iconUrl, jupiterLink }
 
   return (
     <div className="flex flex-col items-center">
-      <img src={iconUrl} alt={`${tokenId} icon`} className="mb-2 w-10 h-10 object-contain"/>
+      <div className="p-1 bg-black rounded-full w-16 h-16 transition-transform group-hover:scale-110">
+        <img src={iconUrl} alt={`${tokenId} icon`} className="object-contain"/>
+      </div>
       <p className="text-2xl font-bold">${tokenData.current_price.toFixed(4)}</p>
       <p className={`text-sm ${tokenData.price_change_percentage_24h >= 0 ? 'text-green-500' : 'text-red-500'}`}>
         {tokenData.price_change_percentage_24h.toFixed(2)}% (24h)

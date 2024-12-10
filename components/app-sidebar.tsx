@@ -14,11 +14,14 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import { usePathname } from 'next/navigation'
+import { Home, InfoIcon, Rocket } from 'lucide-react'
+import { GiMiner } from 'react-icons/gi'
 
 interface MenuData {
   title: string;
   url: string;
   isActive?: boolean;
+  icon?: React.ComponentType;
   items?: MenuData[];
 }
 
@@ -30,12 +33,14 @@ const data: MenuData[] = [
       {
         title: 'Welcome',
         url: '/',
+        icon: Home,
       },
     ],
   },
   {
     title: 'Getting started',
     url: '/getting-started',
+    icon: Rocket,
     items: [
       {
         title: 'Quick start',
@@ -54,6 +59,7 @@ const data: MenuData[] = [
   {
     title: 'Info',
     url: '/info',
+    icon: InfoIcon,
     items: [
       {
         title: 'Pool stats - WIP',
@@ -77,6 +83,7 @@ const data: MenuData[] = [
   {
     title: 'Miner',
     url: '/miner',
+    icon: GiMiner,
     items: [
       {
         title: 'Balance & Stats - WIP',
@@ -111,13 +118,16 @@ export function AppSidebar ({ ...props }: React.ComponentProps<typeof Sidebar>) 
         {data.map((item) =>
           item.items ? (
             <SidebarGroup key={item.title}>
-              <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+              <SidebarGroupLabel>
+                {item.icon && <item.icon/>}
+                <span className="ml-2">{item.title}</span></SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   {item.items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild isActive={pathName === item.url}>
-                        <a href={item.url}>{item.title}</a>
+                        <a href={item.url}>{item.icon && <item.icon/>}
+                          <span className="ml-2">{item.title}</span></a>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}

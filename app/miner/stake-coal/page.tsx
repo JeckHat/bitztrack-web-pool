@@ -40,10 +40,6 @@ export default function StakingPage () {
   }, [])
 
   useEffect(() => {
-    console.log('isPopoverOpen', isPopoverOpen)
-  })
-
-  useEffect(() => {
     const timer = setInterval(() => {
       if (lastRefreshTime) {
         const elapsed = Date.now() - lastRefreshTime
@@ -62,7 +58,6 @@ export default function StakingPage () {
     if (wallet.publicKey) {
       const userBalanceCoal = await getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS)
       const userBalanceLP = await getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS)
-      console.log('userBalance', userBalanceCoal, userBalanceLP)
       setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
       setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
 

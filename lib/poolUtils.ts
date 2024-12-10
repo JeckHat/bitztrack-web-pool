@@ -53,7 +53,6 @@ export async function deserializeInstructionFromJson (jsonInstruction: string) {
 
     // Convert `program_id` to a PublicKey
     const programId = new PublicKey(parsed.program_id)
-    console.log('Deserialized programId:', programId.toString())
 
     // Convert `accounts` to the format expected by Solana
     const keys = parsed.accounts.map((account: {
@@ -65,11 +64,9 @@ export async function deserializeInstructionFromJson (jsonInstruction: string) {
       isSigner: account.is_signer,
       isWritable: account.is_writable,
     }))
-    console.log('Deserialized accounts:', keys)
 
     // Convert `data` to a Buffer
     const data = Buffer.from(parsed.data)
-    console.log('Deserialized data:', data)
 
     // Reconstruct the Solana TransactionInstruction
     return new TransactionInstruction({

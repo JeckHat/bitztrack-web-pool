@@ -78,6 +78,10 @@ const data: MenuData[] = [
         title: 'Team',
         url: '/info/team',
       },
+      {
+        title: 'Roadmap',
+        url: '/info/roadmap',
+      },
     ],
   },
   {

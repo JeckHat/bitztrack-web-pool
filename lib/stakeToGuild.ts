@@ -59,8 +59,8 @@ export async function stakeToGuild (
       } else {
         throw new Error('Error while creating new member instruction')
       }
-    } else if (typeof error === 'object' && error instanceof AxiosError) {
-      throw new Error('Error while checking member status', error.response?.data)
+    } else if (error && (error as AxiosError).response?.data) {
+      throw new Error('Error while checking member status - ' + (error as AxiosError).response?.data)
     } else {
       throw new Error('Error while checking member status')
     }

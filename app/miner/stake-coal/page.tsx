@@ -1,73 +1,173 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
-import { getTokenBalance, stakeToPool } from '@/lib/stakeToPool'
+import { stakeToPool } from '@/lib/stakeToPool'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { COAL_MINT_ADDRESS, COAL_TOKEN_DECIMALS } from '../../../lib/constants'
+import { COAL_MINT_ADDRESS, COAL_SOL_LP_MINT_ADDRESS, COAL_TOKEN_DECIMALS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { useToast } from '../../../hooks/use-toast'
+import { getTokenBalance } from '../../../lib/poolUtils'
+import { stakeToGuild } from '../../../lib/stakeToGuild'
+import { RefreshCw } from 'lucide-react'
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import Link from 'next/link'
+
+const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function StakingPage () {
-  const [amount, setAmount] = useState('')
-  const [balance, setBalance] = useState(0)
-  const [error, setError] = useState('')
+  const [amountCoal, setAmountCoal] = useState('')
+  const [balanceCoal, setBalanceCoal] = useState(0)
+  const [errorCoal, setErrorCoal] = useState('')
+  const [amountLP, setAmountLP] = useState('')
+  const [balanceLP, setBalanceLP] = useState(0)
+  const [errorLP, setErrorLP] = useState('')
   const wallet = useWallet()
   const [isStaking, setIsStaking] = useState(false)
   const { toast } = useToast()
-
-
+  const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
   useEffect(() => {
-    const fetchBalance = async () => {
-      if (wallet.publicKey) {
-        const userBalance = await getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS)
-        console.log('userBalance', userBalance)
-        setBalance(parseFloat(userBalance.toFixed(COAL_TOKEN_DECIMALS)))
-      } else {
-        setBalance(0)
-      }
+    const storedLastRefreshTime = localStorage.getItem('lastRefreshTime')
+    if (storedLastRefreshTime) {
+      setLastRefreshTime(parseInt(storedLastRefreshTime, 10))
     }
+  }, [])
 
-    fetchBalance()
-  }, [wallet.publicKey])
+  useEffect(() => {
+    console.log('isPopoverOpen', isPopoverOpen)
+  })
 
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setAmount(value)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (lastRefreshTime) {
+        const elapsed = Date.now() - lastRefreshTime
+        if (elapsed < COOLDOWN_DURATION) {
+          setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
+        } else {
+          setCooldownRemaining(0)
+        }
+      }
+    }, 1000)
 
-    if (parseFloat(value) > balance) {
-      setError('Insufficient balance')
+    return () => clearInterval(timer)
+  }, [lastRefreshTime])
+
+  const fetchBalance = async () => {
+    if (wallet.publicKey) {
+      const userBalanceCoal = await getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS)
+      const userBalanceLP = await getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS)
+      console.log('userBalance', userBalanceCoal, userBalanceLP)
+      setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
+      setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
+
+      const now = Date.now()
+      setLastRefreshTime(now)
+      localStorage.setItem('lastRefreshTime', now.toString())
     } else {
-      setError('')
+      setBalanceCoal(0)
+      setBalanceLP(0)
     }
   }
 
-  const handleStake = async () => {
-    if (!wallet.connected) {
-      toast({title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive'})
+  useEffect(() => {
+    fetchBalance()
+  }, [wallet.publicKey])
+
+  const handleRefresh = () => {
+    if (cooldownRemaining === 0) {
+      fetchBalance()
+      toast({
+        title: 'Balance Refreshed',
+        description: 'Your balance has been updated.',
+      })
+    } else {
+      toast({
+        title: 'Cooldown Active',
+        description: `Please wait ${cooldownRemaining} seconds before refreshing again.`,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleAmountChangeCoal = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setAmountCoal(value)
+
+    if (parseFloat(value) > balanceCoal) {
+      setErrorCoal('Insufficient balance')
+    } else {
+      setErrorCoal('')
+    }
+  }
+
+  const handleAmountChangeLP = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setAmountLP(value)
+
+    if (parseFloat(value) > balanceLP) {
+      setErrorLP('Insufficient balance')
+    } else {
+      setErrorLP('')
+    }
+  }
+
+  const handleStakeCoal = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      toast({ title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive' })
       return
     }
 
-    if (parseFloat(amount) > balance) {
-      toast({title: 'Balance Error', description: 'Insufficient balance, use a valid amount', variant: 'destructive'})
+    if (parseFloat(amountCoal) > balanceCoal) {
+      toast({ title: 'Balance Error', description: 'Insufficient balance, use a valid amount', variant: 'destructive' })
       return
     }
 
     setIsStaking(true) // Start the loading state
 
     try {
-      await stakeToPool(parseFloat(amount), wallet)
-      toast({title: 'Staking successful', description: 'Stake successfully added to the pool!', variant: 'default'})
-      const newBalance = await getTokenBalance(wallet.publicKey!, COAL_MINT_ADDRESS)
-      setBalance(newBalance)
-      setAmount('')
+      await stakeToPool(parseFloat(amountCoal), wallet)
+      toast({ title: 'Staking successful', description: 'Stake successfully added to the pool!', variant: 'default' })
+      const newBalance = await getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS)
+      setBalanceCoal(newBalance)
+      setAmountCoal('')
     } catch (error) {
       console.error('Staking failed:', error)
-      toast({title: 'Staking failed', description: (error as string).toString(), variant: 'destructive'})
+      toast({ title: 'Staking failed', description: (error as string).toString(), variant: 'destructive' })
+    } finally {
+      setIsStaking(false) // End the loading state
+    }
+  }
+
+  const handleStakeLP = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      toast({ title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive' })
+      return
+    }
+
+    if (parseFloat(amountLP) > balanceLP) {
+      toast({ title: 'Balance Error', description: 'Insufficient balance, use a valid amount', variant: 'destructive' })
+      return
+    }
+
+    setIsStaking(true) // Start the loading state
+
+    try {
+      await stakeToGuild(parseFloat(amountLP), wallet)
+      //wait for 2 seconds
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      toast({ title: 'Staking successful', description: 'Stake successfully added to the guild!', variant: 'default' })
+      const newBalance = await getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS)
+      setBalanceLP(newBalance)
+      setAmountLP('')
+    } catch (error) {
+      console.error('Staking failed:', error)
+      toast({ title: 'Staking failed', description: (error as string).toString(), variant: 'destructive' })
     } finally {
       setIsStaking(false) // End the loading state
     }
@@ -78,7 +178,7 @@ export default function StakingPage () {
       <h1 className="text-4xl font-bold text-center mb-8">COAL Staking</h1>
       <div className="text-center mb-6">
         <p className="text-lg leading-relaxed">
-          Obtain the best rewards by staking your COAL tokens to the pool.
+          Obtain the best rewards with the Pool staking system.
         </p>
       </div>
 
@@ -93,13 +193,73 @@ export default function StakingPage () {
             <CardHeader>
               <CardTitle>Stake to the Guild</CardTitle>
             </CardHeader>
-            <CardContent></CardContent>
+            <CardContent>
+              <div className="bg-muted p-4 rounded-md mb-6">
+                <h3 className="text-lg font-semibold mb-2">Benefits of Staking LP to the Guild</h3>
+                <ul className="list-disc list-inside mb-2">
+                  <li>Adds a multiplier for <strong>every COAL we mine</strong>, benefiting all miners.</li>
+                  <li>Creates <strong>passive returns</strong> for LP stakers from a portion of mining earnings.</li>
+                  <li>Staking is <strong>not required</strong> to get the bonus, but provides additional passive
+                    rewards.
+                  </li>
+                </ul>
+                <p className="mt-4">
+                  You can obtain COAL-SOL LP tokens from <strong>Meteora</strong>.
+                  <Link href="https://app.meteora.ag/pools/F6LXJ8CptcmrofbszVHBRsBvVTX2rNWwFbjCARZukzNS"
+                        target="_blank"
+                        className="underline text-blue-500 hover:text-blue-700 ml-2">
+                    Get COAL-SOL LP here
+                  </Link>
+                </p>
+              </div>
+              <div className="flex items-end">
+                <div className="mt-4">
+                  <Label htmlFor="balanceLP">Available Balance:</Label>
+                  <p id="balanceLP" className="text-lg font-semibold">{balanceLP} COAL-SOL LP</p>
+                </div>
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <div
+                      onMouseEnter={() => setIsPopoverOpen(true)}
+                      onMouseLeave={() => setIsPopoverOpen(false)}>
+                      <Button
+                        className="-mb-1"
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleRefresh}
+                        disabled={cooldownRemaining > 0}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${cooldownRemaining > 0 ? 'text-muted-foreground' : ''}`}/>
+                      </Button>
+                    </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    {cooldownRemaining > 0 ? (
+                      <p>Cooldown: {cooldownRemaining} seconds</p>
+                    ) : (
+                      <p>Click to refresh balance</p>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="amount">Amount to Stake:</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amountLP}
+                  onChange={handleAmountChangeLP}
+                  placeholder="Enter amount to stake"
+                />
+                {errorLP && <p className="text-destructive text-sm mt-1">{errorLP}</p>}
+              </div>
+            </CardContent>
             <CardFooter>
               <Button
                 size="lg"
                 className="relative"
-                onClick={handleStake}
-                disabled={!wallet.connected || parseFloat(amount) > balance || parseFloat(amount) <= 0 || isStaking}
+                onClick={handleStakeLP}
+                disabled={!wallet.connected || isNaN(parseFloat(amountLP)) || parseFloat(amountLP) > balanceLP || parseFloat(amountLP) <= 0 || isStaking}
               >
                 {isStaking && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -120,55 +280,75 @@ export default function StakingPage () {
               <CardTitle>Stake to the Pool</CardTitle>
             </CardHeader>
             <CardContent>
-              <CardContent>
-                <p className="mb-4">Staking your COAL directly with the pool gives every miner the benefit of a higher
-                  multiplier.</p>
-                <div className="bg-muted p-4 rounded-md mb-6">
-                  <h3 className="text-lg font-semibold mb-2">How Staking Affects the Pool</h3>
-                  <p className="mb-2">When you stake COAL, you&#39;re contributing to the pool&#39;s overall stake. This has two
-                    main benefits:</p>
-                  <ul className="list-disc list-inside mb-2">
-                    <li>It increases the multiplier for <strong>all miners</strong> in the pool, boosting everyone&#39;s
-                      rewards.
-                    </li>
-                    <li>The multiplier can go up to <strong>2x</strong> if our pool becomes the top staker in the entire system.</li>
-                  </ul>
-                  <p>By staking, you&#39;re not just increasing your own rewards, but helping all miners in the pool!</p>
-                </div>
+              <div className="bg-muted p-4 rounded-md mb-6">
+                <h3 className="text-lg font-semibold mb-2">Benefits of Staking COAL to the Pool</h3>
+                <ul className="list-disc list-inside mb-2">
+                  <li>Adds a multiplier for <strong>every COAL we mine</strong>, benefiting all miners.</li>
+                  <li>Helps the Pool to reach and maintain the maximum 2x multiplier to distributes more rewards.</li>
+                  <li>Staking is <strong>not required</strong> to get the bonus but helps you and other miners to get
+                    more COAL.
+                  </li>
+                </ul>
+              </div>
+              <div className="flex items-end">
                 <div className="mt-4">
-                  <Label htmlFor="balance">Available Balance:</Label>
-                  <p id="balance" className="text-lg font-semibold">{balance} COAL</p>
+                  <Label htmlFor="balanceCOAL">Available Balance:</Label>
+                  <p id="balanceCOAL" className="text-lg font-semibold">{balanceCoal} COAL</p>
                 </div>
-                <div>
-                  <Label htmlFor="amount">Amount to Stake:</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    value={amount}
-                    onChange={handleAmountChange}
-                    placeholder="Enter amount to stake"
-                  />
-                  {error && <p className="text-destructive text-sm mt-1">{error}</p>}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  size="lg"
-                  className="relative"
-                  onClick={handleStake}
-                  disabled={!wallet.connected || isNaN(parseFloat(amount)) || parseFloat(amount) > balance || parseFloat(amount) <= 0 || isStaking}
-                >
-                  {isStaking && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <div
+                      onMouseEnter={() => setIsPopoverOpen(true)}
+                      onMouseLeave={() => setIsPopoverOpen(false)}>
+                      <Button
+                        className="-mb-1"
+                        size="icon"
+                        variant="ghost"
+                        onClick={handleRefresh}
+                        disabled={cooldownRemaining > 0}
+                      >
+                        <RefreshCw className={`h-4 w-4 ${cooldownRemaining > 0 ? 'text-muted-foreground' : ''}`}/>
+                      </Button>
                     </div>
-                  )}
-                  <span className={isStaking ? 'opacity-0' : ''}>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    {cooldownRemaining > 0 ? (
+                      <p>Cooldown: {cooldownRemaining} seconds</p>
+                    ) : (
+                      <p>Click to refresh balance</p>
+                    )}
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div>
+                <Label htmlFor="amount">Amount to Stake:</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  value={amountCoal}
+                  onChange={handleAmountChangeCoal}
+                  placeholder="Enter amount to stake"
+                />
+                {errorCoal && <p className="text-destructive text-sm mt-1">{errorCoal}</p>}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                size="lg"
+                className="relative"
+                onClick={handleStakeCoal}
+                disabled={!wallet.connected || isNaN(parseFloat(amountCoal)) || parseFloat(amountCoal) > balanceCoal || parseFloat(amountCoal) <= 0 || isStaking}
+              >
+                {isStaking && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <span className={isStaking ? 'opacity-0' : ''}>
                     <strong>STAKE</strong>
                   </span>
-                </Button>
-              </CardFooter>
-            </CardContent>
+              </Button>
+            </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>

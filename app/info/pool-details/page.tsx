@@ -1,13 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import Link from 'next/link'
+import React from 'react'
 
-export default function Page() {
+export default function Page () {
   return (
     <div className="max-w-4xl w-[56rem] mx-auto px-6 py-10">
       <h1 className="text-4xl font-bold text-center mb-8">The Pool</h1>
       <div className="text-center mb-6">
         <p className="text-lg leading-relaxed">
-         Everything you need to know about how the pool is handling COAL and ORE and CHROMIUM mining.
+          Everything you need to know about how the pool is handling COAL and ORE and CHROMIUM mining.
         </p>
       </div>
 
@@ -25,7 +27,7 @@ export default function Page() {
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Mine <strong>3</strong> tokens at the same time</li>
+                <li>Mine <strong>COAL, ORE, CHROMIUM</strong> tokens at the same time</li>
                 <li>Easy to setup hotwallet</li>
                 <li>Mine with the same key from multiple devices</li>
                 <li>Option to use a different wallet for withdrawals</li>
@@ -85,10 +87,26 @@ export default function Page() {
 
               <h3 className="text-lg font-semibold mb-2">Pool Addresses</h3>
               <ul className="space-y-2">
-                <li><strong>Pool address:</strong> 6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM</li>
-                <li><strong>Fee address:</strong> G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS</li>
-                <li><strong>Commission address:</strong> 36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY</li>
-                <li><strong>Guild address:</strong> 3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk</li>
+                <li><strong>Pool address:</strong> <Link
+                  href="https://solscan.io/account/6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM"
+                  target="_blank"
+                  className="underline text-blue-500 hover:text-blue-700">6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM
+                </Link></li>
+                <li><strong>Fee address:</strong> <Link
+                  href="https://solscan.io/account/G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS"
+                  target="_blank"
+                  className="underline text-blue-500 hover:text-blue-700">G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS
+                </Link></li>
+                <li><strong>Commission address:</strong> <Link
+                  href="https://solscan.io/account/36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY"
+                  target="_blank"
+                  className="underline text-blue-500 hover:text-blue-700">36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY
+                </Link></li>
+                <li><strong>Guild address:</strong> <Link
+                  href="https://solscan.io/account/3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk"
+                  target="_blank"
+                  className="underline text-blue-500 hover:text-blue-700">3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk
+                </Link></li>
               </ul>
             </CardContent>
           </Card>
@@ -96,5 +114,5 @@ export default function Page() {
       </Tabs>
     </div>
   )
-    ;
+
 }

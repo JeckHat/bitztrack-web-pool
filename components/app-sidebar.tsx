@@ -24,81 +24,84 @@ interface MenuData {
 
 const data: MenuData[] = [
   {
-    title: "",
-    url: "/",
+    title: '',
+    url: '/',
     items: [
       {
-        title: "Welcome",
-        url: "/",
+        title: 'Welcome',
+        url: '/',
       },
     ],
   },
   {
-    title: "Getting started",
-    url: "/getting-started",
+    title: 'Getting started',
+    url: '/getting-started',
     items: [
       {
-        title: "Quick start",
-        url: "/getting-started/quick-start",
+        title: 'Quick start',
+        url: '/getting-started/quick-start',
       },
       {
-        title: "Advanced mining",
-        url: "/getting-started/advanced-mining",
+        title: 'Advanced mining',
+        url: '/getting-started/advanced-mining',
       },
       {
-        title: "Mobile mining",
-        url: "/getting-started/mobile-mining",
+        title: 'Mobile mining',
+        url: '/getting-started/mobile-mining',
       },
     ],
   },
   {
-    title: "Info",
-    url: "/info",
+    title: 'Info',
+    url: '/info',
     items: [
       {
-        title: "Pool details",
-        url: "/info/pool-details",
-      },
-      {
-        title: "Team",
-        // url: "/info/pool-details",
-        url: "/info/team",
-      },
-      {
-        title: "Pool stats",
+        title: 'Pool stats - WIP',
         // url: "/info/stats",
-        url: "/work-in-progress",
+        url: '/work-in-progress',
+      },
+      {
+        title: 'Pool details',
+        url: '/info/pool-details',
+      },
+      {
+        title: 'Token data',
+        url: '/info/tokens-data',
+      },
+      {
+        title: 'Team',
+        url: '/info/team',
       },
     ],
   },
   {
-    title: "Miner",
-    url: "/miner",
+    title: 'Miner',
+    url: '/miner',
     items: [
       {
-        title: "Balance & Stats",
+        title: 'Balance & Stats - WIP',
         // url: "/miner/balance",
-        url: "/work-in-progress",
+        url: '/work-in-progress',
       },
       {
-        title: "Claim rewards",
+        title: 'Claim rewards - WIP',
         // url: "/miner/rewards",
-        url: "/work-in-progress",
+        url: '/work-in-progress',
       },
       {
-        title: "Stake COAL",
-        url: "/miner/stake-coal",
+        title: 'Stake COAL',
+        url: '/miner/stake-coal',
       },
       {
-        title: "Web mining",
+        title: 'Web mining - WIP',
         // url: "/miner/web-mining",
-        url: "/work-in-progress",
+        url: '/work-in-progress',
       },
     ],
   },
-];
+]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar ({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const pathName = usePathname()
 
@@ -130,7 +133,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           )
         )}
       </SidebarContent>
-      <SidebarRail />
+      <SidebarRail/>
     </Sidebar>
-  );
+  )
 }

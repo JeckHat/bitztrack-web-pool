@@ -42,7 +42,7 @@ export async function stakeToGuild (
     } else if (checkMemberResponse.status === 302) {
       console.log('Member already in the guild but no delegation needed')
     } else {
-      throw new Error('Error while checking member status')
+      throw new Error('Error while checking member status', checkMemberResponse.data)
     }
   } catch (error) {
     console.log('error', error)
@@ -59,6 +59,8 @@ export async function stakeToGuild (
       } else {
         throw new Error('Error while creating new member instruction')
       }
+    } else if (typeof error === 'object' && error instanceof AxiosError) {
+      throw new Error('Error while checking member status', error.response?.data)
     } else {
       throw new Error('Error while checking member status')
     }

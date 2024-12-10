@@ -1,4 +1,4 @@
-import { BlockhashWithExpiryBlockHeight, PublicKey, TransactionInstruction } from '@solana/web3.js'
+import { BlockhashWithExpiryBlockHeight, PublicKey, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
 import axios from 'axios'
 import { BalanceData, BlockhashData } from '../pages/api/apiDataTypes'
@@ -47,34 +47,38 @@ export async function signUpMiner (publicKey: string): Promise<void> {
   }
 }
 
-export async function deserializeInstructionFromJson(jsonInstruction: string) {
+export async function deserializeInstructionFromJson (jsonInstruction: string) {
   try {
-    const parsed = JSON.parse(jsonInstruction);
+    const parsed = JSON.parse(jsonInstruction)
 
     // Convert `program_id` to a PublicKey
-    const programId = new PublicKey(parsed.program_id);
-    console.log('Deserialized programId:', programId.toString());
+    const programId = new PublicKey(parsed.program_id)
+    console.log('Deserialized programId:', programId.toString())
 
     // Convert `accounts` to the format expected by Solana
-    const keys = parsed.accounts.map((account: any) => ({
+    const keys = parsed.accounts.map((account: {
+      pubkey: PublicKeyInitData;
+      is_signer: boolean;
+      is_writable: boolean
+    }) => ({
       pubkey: new PublicKey(account.pubkey),
       isSigner: account.is_signer,
       isWritable: account.is_writable,
-    }));
-    console.log('Deserialized accounts:', keys);
+    }))
+    console.log('Deserialized accounts:', keys)
 
     // Convert `data` to a Buffer
-    const data = Buffer.from(parsed.data);
-    console.log('Deserialized data:', data);
+    const data = Buffer.from(parsed.data)
+    console.log('Deserialized data:', data)
 
     // Reconstruct the Solana TransactionInstruction
     return new TransactionInstruction({
       programId,
       keys,
       data,
-    });
+    })
   } catch (error) {
-    console.error('Failed to deserialize instruction:', error);
-    throw error;
+    console.error('Failed to deserialize instruction:', error)
+    throw error
   }
 }

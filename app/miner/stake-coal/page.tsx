@@ -10,11 +10,12 @@ import { Label } from '@/components/ui/label'
 import { COAL_MINT_ADDRESS, COAL_SOL_LP_MINT_ADDRESS, COAL_TOKEN_DECIMALS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { useToast } from '../../../hooks/use-toast'
-import { getTokenBalance } from '../../../lib/poolUtils'
+import { getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
 import { stakeToGuild } from '../../../lib/stakeToGuild'
 import { RefreshCw } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import Link from 'next/link'
+import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -31,6 +32,13 @@ export default function StakingPage () {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+  const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
+
+  useEffect(() => {
+    if (!poolStakeAndMultipliers) {
+      fetchPoolStakeAndMultipliers()
+    }
+  }, [poolStakeAndMultipliers])
 
   useEffect(() => {
     const storedLastRefreshTime = localStorage.getItem('lastRefreshTime')
@@ -53,6 +61,15 @@ export default function StakingPage () {
 
     return () => clearInterval(timer)
   }, [lastRefreshTime])
+
+  const fetchPoolStakeAndMultipliers = async () => {
+    try {
+      const response = await getPoolStakeAndMultipliers()
+      setPoolStakeAndMultipliers(response)
+    } catch (error) {
+      console.error('Failed to fetch pool stake and multipliers:', error)
+    }
+  }
 
   const fetchBalance = async () => {
     if (wallet.publicKey) {
@@ -187,6 +204,8 @@ export default function StakingPage () {
           <Card>
             <CardHeader>
               <CardTitle>Stake to the Guild</CardTitle>
+              Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? 0}x - Total
+              Stake: {poolStakeAndMultipliers?.guild_stake ?? 0} COAL-SOL
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
@@ -277,6 +296,8 @@ export default function StakingPage () {
           <Card>
             <CardHeader>
               <CardTitle>Stake to the Pool</CardTitle>
+              Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? 0}x - Total
+              Stake: {poolStakeAndMultipliers?.coal_stake ?? 0} COAL
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">

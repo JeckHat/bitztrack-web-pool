@@ -1,8 +1,8 @@
 import { BlockhashWithExpiryBlockHeight, PublicKey, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
 import axios from 'axios'
-import { BalanceData, BlockhashData } from '../pages/api/apiDataTypes'
-import { POOL_SERVER } from './constants'
+import { BalanceData, BlockhashData, StakeAndMultipliers, StakeAndMultipliersString } from '../pages/api/apiDataTypes'
+import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
 
 export async function getTokenBalance (publicKey: PublicKey, mintAddress: PublicKey): Promise<number> {
   const tokenAccount = await getAssociatedTokenAddress(mintAddress, publicKey)
@@ -77,5 +77,18 @@ export async function deserializeInstructionFromJson (jsonInstruction: string) {
   } catch (error) {
     console.error('Failed to deserialize instruction:', error)
     throw error
+  }
+}
+
+export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliersString> {
+  const response = await axios.get<StakeAndMultipliers>(`${POOL_SERVER}/pool/stakes-multipliers`)
+  const stakeAndMultipliers = response.data
+  return {
+    coal_multiplier: stakeAndMultipliers.coal_multiplier.toFixed(2).toString(),
+    coal_stake: (stakeAndMultipliers.coal_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
+    guild_multiplier: stakeAndMultipliers.guild_multiplier.toFixed(2).toString(),
+    guild_stake: (stakeAndMultipliers.guild_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
+    tool_multiplier: stakeAndMultipliers.tool_multiplier.toFixed(2).toString(),
+    ore_stake: (stakeAndMultipliers.ore_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
   }
 }

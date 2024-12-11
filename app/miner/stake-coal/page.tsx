@@ -234,7 +234,7 @@ export default function StakingPage () {
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-2">
                     {cooldownRemaining > 0 ? (
-                      <p>Cooldown: {cooldownRemaining} seconds</p>
+                      <p>Refresh cooldown: {cooldownRemaining} seconds</p>
                     ) : (
                       <p>Click to refresh balance</p>
                     )}
@@ -313,7 +313,7 @@ export default function StakingPage () {
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-2">
                     {cooldownRemaining > 0 ? (
-                      <p>Cooldown: {cooldownRemaining} seconds</p>
+                      <p>Refresh cooldown: {cooldownRemaining} seconds</p>
                     ) : (
                       <p>Click to refresh balance</p>
                     )}

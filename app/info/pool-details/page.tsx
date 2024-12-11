@@ -90,22 +90,22 @@ export default function Page () {
                 <li><strong>Pool address:</strong> <Link
                   href="https://solscan.io/account/6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM"
                   target="_blank"
-                  className="underline text-blue-500 hover:text-blue-700">6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM
+                  className="underline text-blue-500 hover:text-blue-700 break-words">6zbGwDbfwVS3hF8r7Yei8HuwSWm2yb541jUtmAZKhFDM
                 </Link></li>
                 <li><strong>Fee address:</strong> <Link
                   href="https://solscan.io/account/G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS"
                   target="_blank"
-                  className="underline text-blue-500 hover:text-blue-700">G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS
+                  className="underline text-blue-500 hover:text-blue-700 break-words">G2JTCdxC3fDK61XVchtX2fo8zHvzYubYkqfmRf3gJ2uS
                 </Link></li>
                 <li><strong>Commission address:</strong> <Link
                   href="https://solscan.io/account/36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY"
                   target="_blank"
-                  className="underline text-blue-500 hover:text-blue-700">36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY
+                  className="underline text-blue-500 hover:text-blue-700 break-words">36fkW2RgF6jNqmYpurMfUyHj1mpJw9Cann9AJmdhBbwY
                 </Link></li>
                 <li><strong>Guild address:</strong> <Link
                   href="https://solscan.io/account/3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk"
                   target="_blank"
-                  className="underline text-blue-500 hover:text-blue-700">3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk
+                  className="underline text-blue-500 hover:text-blue-700 break-words">3EjkgNBpCequ2Pq697kas4LHyzNwp1DhDWMKF1mGKfAk
                 </Link></li>
               </ul>
             </CardContent>

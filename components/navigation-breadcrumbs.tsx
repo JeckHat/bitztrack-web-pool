@@ -27,7 +27,7 @@ export function NavigationBreadcrumbs () {
             const label = crumb.replaceAll('-', ' ')
             return (
               <Fragment key={crumb}>
-                <BreadcrumbItem className="block">
+                <BreadcrumbItem className={`block ${isLast ? '' : 'hidden sm:block'}`}>
                   {isLast ? (
                     <BreadcrumbPage className="capitalize">
                       {label}
@@ -41,7 +41,7 @@ export function NavigationBreadcrumbs () {
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {isLast ? null : <BreadcrumbSeparator className="block"/>}
+                {isLast ? null : <BreadcrumbSeparator className={`block ${isLast ? '' : 'hidden sm:block'}`}/>}
               </Fragment>
             )
           })}

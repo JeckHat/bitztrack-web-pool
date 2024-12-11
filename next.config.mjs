@@ -1,18 +1,28 @@
-import nextMDX from "@next/mdx";
-import rehypePrettyCode from "rehype-pretty-code";
+import nextMDX from '@next/mdx'
+import rehypePrettyCode from 'rehype-pretty-code'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async redirects() {
+  async redirects () {
     return [
       {
-        source: "/getting-started",
-        destination: "/getting-started/quick-start",
+        source: '/getting-started',
+        destination: '/getting-started/quick-start',
         permanent: true,
       },
-    ];
+      {
+        source: '/info',
+        destination: '/info/pool-details',
+        permanent: true,
+      },
+      {
+        source: '/miner',
+        destination: '/miner/stake-coal',
+        permanent: true,
+      },
+    ]
   },
-};
+}
 
 const options = {}
 
@@ -22,6 +32,6 @@ const withMDX = nextMDX({
     remarkPlugins: [],
     rehypePlugins: [[rehypePrettyCode, options]],
   },
-});
+})
 
-export default withMDX(nextConfig);
+export default withMDX(nextConfig)

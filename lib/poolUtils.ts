@@ -85,10 +85,10 @@ export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliers
   const stakeAndMultipliers = response.data
   return {
     coal_multiplier: stakeAndMultipliers.coal_multiplier.toFixed(2).toString(),
-    coal_stake: (stakeAndMultipliers.coal_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
+    coal_stake: (stakeAndMultipliers.coal_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
     guild_multiplier: stakeAndMultipliers.guild_multiplier.toFixed(2).toString(),
-    guild_stake: (stakeAndMultipliers.guild_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
+    guild_stake: (stakeAndMultipliers.guild_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
     tool_multiplier: stakeAndMultipliers.tool_multiplier.toFixed(2).toString(),
-    ore_stake: (stakeAndMultipliers.ore_stake / COAL_TOKEN_DECIMALS).toFixed(2).toString(),
+    ore_stake: (stakeAndMultipliers.ore_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
   }
 }

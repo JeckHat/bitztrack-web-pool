@@ -40,6 +40,11 @@ export async function getLatestBlockhash (): Promise<BlockhashWithExpiryBlockHei
   return response.data.latestBlockhash
 }
 
+export async function getLPStake (publicKey: PublicKey): Promise<number> {
+  const response = await axios.get<number>(`${POOL_SERVER}/miner/guild-stake?pubkey=${publicKey.toString()}`)
+  return response.data
+}
+
 export async function getFeePayerPubkey (): Promise<PublicKey> {
   const response = await axios.get(`${POOL_SERVER}/pool/fee_payer/pubkey`)
   return new PublicKey(response.data)

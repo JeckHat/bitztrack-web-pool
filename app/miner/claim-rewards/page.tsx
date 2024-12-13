@@ -5,45 +5,107 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
-import { getTokenBalance } from '../../../lib/poolUtils'
-import {
-  CHROMIUM_MINT_ADDRESS,
-  COAL_MINT_ADDRESS,
-  COAL_SOL_LP_MINT_ADDRESS,
-  ORE_MINT_ADDRESS
-} from '../../../lib/constants'
+import { getLPStake, getMinerRewards, getTokenBalance } from '../../../lib/poolUtils'
+import { COAL_SOL_LP_MINT_ADDRESS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import { MinerBalanceString } from '../../../pages/api/apiDataTypes'
+import { RefreshCw } from 'lucide-react'
+import { useToast } from '@/hooks/use-toast'
+
+const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function Page () {
   const wallet = useWallet()
-  const [miningRewards, setMiningRewards] = useState({ coal: 0, ore: 0, chromium: 0 })
-  const [guildStake,
-    //setGuildStake
-  ] = useState({ staked: 0, estimatedReturn: 0, claimable: 0 })
+  const { toast } = useToast()
+  const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
   const [lpBalance, setLpBalance] = useState({ staked: 0, wallet: 0 })
   const [unstakeAmount, setUnstakeAmount] = useState('')
+  const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
+  const [cooldownRemaining, setCooldownRemaining] = useState(0)
 
   useEffect(() => {
-    if (wallet.publicKey) {
-      fetchBalances()
-      fetchGuildStake()
+    const storedLastFetchTime = localStorage.getItem('lastClaimRewardsFetchTime')
+    if (storedLastFetchTime) {
+      const lastFetchTime = parseInt(storedLastFetchTime, 10)
+      setLastFetchTime(lastFetchTime)
+      const elapsed = Date.now() - lastFetchTime
+      if (elapsed < COOLDOWN_DURATION) {
+        setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
+      } else {
+        // Only fetch if the cooldown has expired
+        if (wallet.publicKey) {
+          fetchData()
+        }
+      }
+    } else {
+      // If there's no stored fetch time, it's the first fetch
+      if (wallet.publicKey) {
+        fetchData()
+      }
     }
   }, [wallet.publicKey])
 
-  const fetchBalances = async () => {
-    const coal = await getTokenBalance(wallet.publicKey!, COAL_MINT_ADDRESS)
-    const ore = await getTokenBalance(wallet.publicKey!, ORE_MINT_ADDRESS)
-    const chromium = await getTokenBalance(wallet.publicKey!, CHROMIUM_MINT_ADDRESS)
-    setMiningRewards({ coal, ore, chromium })
+  useEffect(() => {
+    const storedLastFetchTime = localStorage.getItem('lastClaimRewardsFetchTime')
+    if (storedLastFetchTime) {
+      setLastFetchTime(parseInt(storedLastFetchTime, 10))
+    }
+  }, [])
 
-    const lpWallet = await getTokenBalance(wallet.publicKey!, COAL_SOL_LP_MINT_ADDRESS)
-    setLpBalance(prev => ({ ...prev, wallet: lpWallet }))
-  }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (lastFetchTime) {
+        const elapsed = Date.now() - lastFetchTime
+        if (elapsed < COOLDOWN_DURATION) {
+          setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
+        } else {
+          setCooldownRemaining(0)
+        }
+      }
+    }, 1000)
 
-  const fetchGuildStake = async () => {
-    // const { staked, estimatedReturn, claimable } = await getPoolStakeAndMultipliers()
-    // setGuildStake({ staked, estimatedReturn, claimable })
-    // setLpBalance(prev => ({ ...prev, staked }))
+    return () => clearInterval(timer)
+  }, [lastFetchTime])
+
+  const fetchData = async () => {
+    if (wallet.publicKey) {
+      if (cooldownRemaining > 0) {
+        toast({
+          title: 'Cooldown Active',
+          description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      try {
+        const [rewardsResponse, lpWalletBalance, lpStakeBalance] = await Promise.all([
+          getMinerRewards(wallet.publicKey.toString()),
+          getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS),
+          getLPStake(wallet.publicKey)
+        ])
+
+        setMinerRewards(rewardsResponse)
+        setLpBalance(prev => ({ ...prev, wallet: lpWalletBalance, staked: lpStakeBalance }))
+
+        const now = Date.now()
+        setLastFetchTime(now)
+        localStorage.setItem('lastClaimRewardsFetchTime', now.toString())
+        setCooldownRemaining(COOLDOWN_DURATION / 1000) // Set cooldown to full duration
+
+        toast({
+          title: 'Data Fetched',
+          description: 'Claim rewards data has been updated.',
+        })
+      } catch (error) {
+        console.error('Error fetching data:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch claim rewards data. Please try again.',
+          variant: 'destructive',
+        })
+      }
+    }
   }
 
   const handleClaimMiningRewards = () => {
@@ -51,14 +113,14 @@ export default function Page () {
     console.log('Claiming mining rewards')
   }
 
-  const handleClaimGuildRewards = () => {
-    // Implement claim guild rewards logic
-    console.log('Claiming guild rewards')
-  }
-
   const handleUnstake = () => {
     // Implement unstake logic
     console.log('Unstaking', unstakeAmount)
+  }
+
+  const isUnstakeButtonDisabled = () => {
+    const amount = parseFloat(unstakeAmount)
+    return isNaN(amount) || amount <= 0 || amount > lpBalance.staked
   }
 
   return (
@@ -72,33 +134,51 @@ export default function Page () {
       </h4>
 
       <Tabs defaultValue="mining" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="mining">Mining Rewards</TabsTrigger>
-          <TabsTrigger value="guild">Guild Rewards</TabsTrigger>
           <TabsTrigger value="unstake">Unstake Guild LP</TabsTrigger>
         </TabsList>
 
         <TabsContent value="mining">
           <Card>
             <CardHeader>
-              <CardTitle>Mining Rewards</CardTitle>
+              <CardTitle>
+                <div className="flex items-center justify-between">
+                  Mining Rewards
+                  <Button
+                    onClick={fetchData}
+                    disabled={cooldownRemaining > 0}
+                    className="relative"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4"/>
+                    {cooldownRemaining > 0 ? `Refresh (${cooldownRemaining}s)` : 'Refresh Data'}
+                    {cooldownRemaining > 0 && (
+                      <div
+                        className="absolute bottom-0 left-0 h-1 bg-primary"
+                        style={{
+                          width: `${((COOLDOWN_DURATION - cooldownRemaining * 1000) / COOLDOWN_DURATION) * 100}%`,
+                          transition: 'width 1s linear'
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
                 <p className="mb-2">
                   <strong>COAL</strong> and <strong>ORE</strong> rewards are earned every minute while you&#39;re
-                  actively
-                  mining in the pool. These rewards are distributed when a mining transaction is submitted.
+                  actively mining in the pool. These rewards are distributed when a mining transaction is submitted.
                 </p>
                 <p>
                   <strong>CHROMIUM</strong> is earned each time the pool reprocesses COAL, provided you&#39;ve been
-                  active
-                  in the pool during the previous days.
+                  active in the pool during the previous days.
                 </p>
               </div>
-              <p>COAL: {miningRewards.coal}</p>
-              <p>ORE: {miningRewards.ore}</p>
-              <p>CHROMIUM: {miningRewards.chromium}</p>
+              <p>COAL: {minerRewards?.coal || '0'}</p>
+              <p>ORE: {minerRewards?.ore || '0'}</p>
+              <p>CHROMIUM: {minerRewards?.chromium || '0'}</p>
             </CardContent>
             <CardFooter>
               <Button onClick={handleClaimMiningRewards}><strong>CLAIM ALL MINING REWARDS</strong></Button>
@@ -106,36 +186,31 @@ export default function Page () {
           </Card>
         </TabsContent>
 
-        <TabsContent value="guild">
-          <Card>
-            <CardHeader>
-              <CardTitle>Guild LP Staking Rewards</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted p-4 rounded-md mb-6">
-                <p className="mb-2">
-                  Guild rewards are distributed every few hours to users who provide COAL-SOL LP tokens to the
-                  guild.
-                </p>
-                <p>
-                  These rewards accumulate passively - you don&#39;t need to actively mine to earn them. The amount of
-                  rewards is proportional to your staked LP tokens.
-                </p>
-              </div>
-              <p>LP Staked: {guildStake.staked}</p>
-              <p>Estimated Return per Day: {guildStake.estimatedReturn}</p>
-              <p>Claimable COAL: {guildStake.claimable}</p>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleClaimGuildRewards}><strong>CLAIM GUILD REWARDS</strong></Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-
         <TabsContent value="unstake">
           <Card>
             <CardHeader>
-              <CardTitle>Unstake Guild LP</CardTitle>
+              <CardTitle>
+                <div className="flex items-center justify-between">
+                  Unstake Guild LP
+                  <Button
+                    onClick={fetchData}
+                    disabled={cooldownRemaining > 0}
+                    className="relative"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4"/>
+                    {cooldownRemaining > 0 ? `Refresh (${cooldownRemaining}s)` : 'Refresh Data'}
+                    {cooldownRemaining > 0 && (
+                      <div
+                        className="absolute bottom-0 left-0 h-1 bg-primary"
+                        style={{
+                          width: `${((COOLDOWN_DURATION - cooldownRemaining * 1000) / COOLDOWN_DURATION) * 100}%`,
+                          transition: 'width 1s linear'
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
@@ -158,11 +233,40 @@ export default function Page () {
               />
             </CardContent>
             <CardFooter>
-              <Button onClick={handleUnstake}><strong>UNSTAKE</strong></Button>
+              <Button onClick={handleUnstake} disabled={isUnstakeButtonDisabled()}><strong>UNSTAKE</strong></Button>
             </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
   )
+}
+
+{/*<TabsTrigger value="guild">Guild Rewards</TabsTrigger>*/}
+
+{/* <TabsContent value="guild">
+          <Card>
+            <CardHeader>
+              <CardTitle>Guild LP Staking Rewards</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted p-4 rounded-md mb-6">
+                <p className="mb-2">
+                  Guild rewards are distributed every few hours to users who provide COAL-SOL LP tokens to the
+                  guild.
+                </p>
+                <p>
+                  These rewards accumulate passively - you don&#39;t need to actively mine to earn them. The amount of
+                  rewards is proportional to your staked LP tokens.
+                </p>
+              </div>
+              <p>LP Staked: {poolStakeAndMultipliers?.total_lp_staked || '0'}</p>
+              <p>Estimated Return per Day: {poolStakeAndMultipliers?.estimated_daily_return || '0'}</p>
+              <p>Claimable COAL: {poolStakeAndMultipliers?.claimable_coal || '0'}</p>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleClaimGuildRewards}><strong>CLAIM GUILD REWARDS</strong></Button>
+            </CardFooter>
+          </Card>
+        </TabsContent> */
 }

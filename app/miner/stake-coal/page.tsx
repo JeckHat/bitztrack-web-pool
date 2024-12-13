@@ -13,7 +13,6 @@ import { useToast } from '../../../hooks/use-toast'
 import { getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
 import { stakeToGuild } from '../../../lib/stakeToGuild'
 import { RefreshCw } from 'lucide-react'
-import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import Link from 'next/link'
 import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 
@@ -31,21 +30,29 @@ export default function StakingPage () {
   const { toast } = useToast()
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
-
-  useEffect(() => {
-    if (!poolStakeAndMultipliers) {
-      fetchPoolStakeAndMultipliers()
-    }
-  }, [poolStakeAndMultipliers])
 
   useEffect(() => {
     const storedLastRefreshTime = localStorage.getItem('lastRefreshTime')
     if (storedLastRefreshTime) {
-      setLastRefreshTime(parseInt(storedLastRefreshTime, 10))
+      const lastRefreshTime = parseInt(storedLastRefreshTime, 10)
+      setLastRefreshTime(lastRefreshTime)
+      const elapsed = Date.now() - lastRefreshTime
+      if (elapsed < COOLDOWN_DURATION) {
+        setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
+      } else {
+        // Only fetch if the cooldown has expired
+        if (wallet.publicKey) {
+          fetchData()
+        }
+      }
+    } else {
+      // If there's no stored refresh time, it's the first fetch
+      if (wallet.publicKey) {
+        fetchData()
+      }
     }
-  }, [])
+  }, [wallet.publicKey])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -62,48 +69,45 @@ export default function StakingPage () {
     return () => clearInterval(timer)
   }, [lastRefreshTime])
 
-  const fetchPoolStakeAndMultipliers = async () => {
-    try {
-      const response = await getPoolStakeAndMultipliers()
-      setPoolStakeAndMultipliers(response)
-    } catch (error) {
-      console.error('Failed to fetch pool stake and multipliers:', error)
-    }
-  }
-
-  const fetchBalance = async () => {
+  const fetchData = async () => {
     if (wallet.publicKey) {
-      const userBalanceCoal = await getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS)
-      const userBalanceLP = await getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS)
-      setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
-      setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
+      if (cooldownRemaining > 0) {
+        toast({
+          title: 'Cooldown Active',
+          description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
+          variant: 'destructive',
+        })
+        return
+      }
 
-      const now = Date.now()
-      setLastRefreshTime(now)
-      localStorage.setItem('lastRefreshTime', now.toString())
-    } else {
-      setBalanceCoal(0)
-      setBalanceLP(0)
-    }
-  }
+      try {
+        const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
+          getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS),
+          getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS),
+          getPoolStakeAndMultipliers()
+        ])
 
-  useEffect(() => {
-    fetchBalance()
-  }, [wallet.publicKey])
+        setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
+        setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
+        setPoolStakeAndMultipliers(poolStakeData)
 
-  const handleRefresh = () => {
-    if (cooldownRemaining === 0) {
-      fetchBalance()
-      toast({
-        title: 'Balance Refreshed',
-        description: 'Your balance has been updated.',
-      })
-    } else {
-      toast({
-        title: 'Cooldown Active',
-        description: `Please wait ${cooldownRemaining} seconds before refreshing again.`,
-        variant: 'destructive',
-      })
+        const now = Date.now()
+        setLastRefreshTime(now)
+        localStorage.setItem('lastRefreshTime', now.toString())
+        setCooldownRemaining(COOLDOWN_DURATION / 1000) // Set cooldown to full duration
+
+        toast({
+          title: 'Data Fetched',
+          description: 'Your balance has been updated.',
+        })
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+        toast({
+          title: 'Error',
+          description: 'Failed to fetch data. Please try again.',
+          variant: 'destructive',
+        })
+      }
     }
   }
 
@@ -203,9 +207,36 @@ export default function StakingPage () {
         <TabsContent value="guild">
           <Card>
             <CardHeader>
-              <CardTitle>Stake to the Guild</CardTitle>
-              Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? '-'}x - Total
-              Stake: {poolStakeAndMultipliers?.guild_stake ?? '-'} COAL-SOL
+              <CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span>
+                    Stake to the Guild
+                    </span>
+                    <span>
+                    Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? '-'}x - Total
+                    Stake: {poolStakeAndMultipliers?.guild_stake ?? '-'} COAL-SOL
+                    </span>
+                  </div>
+                  <Button
+                    onClick={fetchData}
+                    disabled={cooldownRemaining > 0}
+                    className="relative"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4"/>
+                    {cooldownRemaining > 0 ? `Refresh (${cooldownRemaining}s)` : 'Refresh Data'}
+                    {cooldownRemaining > 0 && (
+                      <div
+                        className="absolute bottom-0 left-0 h-1 bg-primary"
+                        style={{
+                          width: `${((COOLDOWN_DURATION - cooldownRemaining * 1000) / COOLDOWN_DURATION) * 100}%`,
+                          transition: 'width 1s linear'
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
@@ -230,35 +261,9 @@ export default function StakingPage () {
                   </Link>
                 </p>
               </div>
-              <div className="flex items-end">
-                <div className="mt-4">
-                  <Label htmlFor="balanceLP">Available Balance:</Label>
-                  <p id="balanceLP" className="text-lg font-semibold">{balanceLP} COAL-SOL LP</p>
-                </div>
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <div
-                      onMouseEnter={() => setIsPopoverOpen(true)}
-                      onMouseLeave={() => setIsPopoverOpen(false)}>
-                      <Button
-                        className="-mb-1"
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleRefresh}
-                        disabled={cooldownRemaining > 0}
-                      >
-                        <RefreshCw className={`h-4 w-4 ${cooldownRemaining > 0 ? 'text-muted-foreground' : ''}`}/>
-                      </Button>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-2">
-                    {cooldownRemaining > 0 ? (
-                      <p>Refresh cooldown: {cooldownRemaining} seconds</p>
-                    ) : (
-                      <p>Click to refresh balance</p>
-                    )}
-                  </PopoverContent>
-                </Popover>
+              <div className="mt-4">
+                <Label htmlFor="balanceLP">Available Balance:</Label>
+                <p id="balanceLP" className="text-lg font-semibold">{balanceLP} COAL-SOL LP</p>
               </div>
               <div>
                 <Label htmlFor="amount">Amount to Stake:</Label>
@@ -295,9 +300,36 @@ export default function StakingPage () {
         <TabsContent value="pool">
           <Card>
             <CardHeader>
-              <CardTitle>Stake to the Pool</CardTitle>
-              Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? '-'}x - Total
-              Stake: {poolStakeAndMultipliers?.coal_stake ?? '-'} COAL
+              <CardTitle>
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span>
+                    Stake to the Pool
+                    </span>
+                    <span>
+                    Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? '-'}x - Total
+                    Stake: {poolStakeAndMultipliers?.coal_stake ?? '-'} COAL
+                    </span>
+                  </div>
+                  <Button
+                    onClick={fetchData}
+                    disabled={cooldownRemaining > 0}
+                    className="relative"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4"/>
+                    {cooldownRemaining > 0 ? `Refresh (${cooldownRemaining}s)` : 'Refresh Data'}
+                    {cooldownRemaining > 0 && (
+                      <div
+                        className="absolute bottom-0 left-0 h-1 bg-primary"
+                        style={{
+                          width: `${((COOLDOWN_DURATION - cooldownRemaining * 1000) / COOLDOWN_DURATION) * 100}%`,
+                          transition: 'width 1s linear'
+                        }}
+                      />
+                    )}
+                  </Button>
+                </div>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
@@ -311,35 +343,9 @@ export default function StakingPage () {
                   </li>
                 </ul>
               </div>
-              <div className="flex items-end">
-                <div className="mt-4">
-                  <Label htmlFor="balanceCOAL">Available Balance:</Label>
-                  <p id="balanceCOAL" className="text-lg font-semibold">{balanceCoal} COAL</p>
-                </div>
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                  <PopoverTrigger asChild>
-                    <div
-                      onMouseEnter={() => setIsPopoverOpen(true)}
-                      onMouseLeave={() => setIsPopoverOpen(false)}>
-                      <Button
-                        className="-mb-1"
-                        size="icon"
-                        variant="ghost"
-                        onClick={handleRefresh}
-                        disabled={cooldownRemaining > 0}
-                      >
-                        <RefreshCw className={`h-4 w-4 ${cooldownRemaining > 0 ? 'text-muted-foreground' : ''}`}/>
-                      </Button>
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-2">
-                    {cooldownRemaining > 0 ? (
-                      <p>Refresh cooldown: {cooldownRemaining} seconds</p>
-                    ) : (
-                      <p>Click to refresh balance</p>
-                    )}
-                  </PopoverContent>
-                </Popover>
+              <div className="mt-4">
+                <Label htmlFor="balanceCOAL">Available Balance:</Label>
+                <p id="balanceCOAL" className="text-lg font-semibold">{balanceCoal} COAL</p>
               </div>
               <div>
                 <Label htmlFor="amount">Amount to Stake:</Label>

@@ -94,9 +94,8 @@ const data: MenuData[] = [
         url: '/miner/balance-stats',
       },
       {
-        title: 'Claim rewards - WIP',
-        // url: '/miner/claim-rewards',
-        url: '/work-in-progress',
+        title: 'Claim rewards',
+        url: '/miner/claim-rewards',
       },
       {
         title: 'Stake COAL',

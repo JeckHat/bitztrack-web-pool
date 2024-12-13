@@ -32,6 +32,8 @@ export default function Page () {
         <p className="text-lg leading-relaxed">
           Everything you need to know about how the pool is handling COAL and ORE and CHROMIUM mining.
         </p>
+        <p>And what gives us a <strong>{poolStakeAndMultipliers?.total_coal_multiplier ?? '-'}x</strong> multiplier on
+          each mining transaction.</p>
       </div>
 
       <Tabs defaultValue="features" className="w-full">

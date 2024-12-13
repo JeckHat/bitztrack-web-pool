@@ -4,12 +4,17 @@ import axios from 'axios'
 import {
   BalanceData,
   BlockhashData,
+  ChromiumReprocessInfo,
+  ChromiumReprocessInfoWithDate,
   MinerBalance,
   MinerBalanceString,
   StakeAndMultipliers,
-  StakeAndMultipliersString
+  StakeAndMultipliersString,
+  Submission,
+  SubmissionWithDate
 } from '../pages/api/apiDataTypes'
 import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
+import { parseISO } from 'date-fns'
 
 export async function getTokenBalance (publicKey: PublicKey, mintAddress: PublicKey): Promise<number> {
   const tokenAccount = await getAssociatedTokenAddress(mintAddress, publicKey)
@@ -90,21 +95,52 @@ export async function deserializeInstructionFromJson (jsonInstruction: string) {
 export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliersString> {
   const response = await axios.get<StakeAndMultipliers>(`${POOL_SERVER}/pool/stakes-multipliers`)
   const stakeAndMultipliers = response.data
+  const coalMultiplier = parseFloat(stakeAndMultipliers.coal_multiplier.toFixed(2))
+  const guildMultiplier = parseFloat(stakeAndMultipliers.guild_multiplier.toFixed(2))
+  const toolMultiplier = parseFloat(stakeAndMultipliers.tool_multiplier.toFixed(2))
+  const totalCoalMultiplier = parseFloat((coalMultiplier * guildMultiplier * toolMultiplier).toFixed(2))
   return {
-    coal_multiplier: stakeAndMultipliers.coal_multiplier.toFixed(2).toString(),
+    coal_multiplier: coalMultiplier.toString(),
     coal_stake: (stakeAndMultipliers.coal_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
-    guild_multiplier: stakeAndMultipliers.guild_multiplier.toFixed(2).toString(),
+    guild_multiplier: guildMultiplier.toString(),
     guild_stake: (stakeAndMultipliers.guild_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
-    tool_multiplier: stakeAndMultipliers.tool_multiplier.toFixed(2).toString(),
+    tool_multiplier: toolMultiplier.toString(),
+    total_coal_multiplier: totalCoalMultiplier.toString(),
     ore_stake: (stakeAndMultipliers.ore_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
   }
 }
 
 export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
-  const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/balance?pubkey=${publicKey}`)
+  const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
   return {
-    coal: (response.data.coal / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
-    ore: (response.data.ore / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
-    chromium: (response.data.chromium / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
+    coal: response.data.coal.toString(),
+    ore: response.data.ore.toString(),
+    chromium: response.data.chromium.toString(),
+  }
+}
+
+export async function getMinerSubmissions (publicKey: string): Promise<SubmissionWithDate[]> {
+  const response = await axios.get<Submission[]>(`${POOL_SERVER}/miner/submissions?pubkey=${publicKey}`)
+  return response.data.map(x => {
+    const sub: SubmissionWithDate = {
+      created_at: parseISO(x.created_at + '.000Z'),
+      difficulty: x.difficulty,
+      nonce: x.nonce,
+    }
+    return sub
+  })
+}
+
+export async function getLastMinerSubmission (publicKey: string): Promise<SubmissionWithDate> {
+  const submissions = await getMinerSubmissions(publicKey)
+  console.log('submissions', submissions)
+  return submissions[0]
+}
+
+export async function getPoolChromiumReprocessingInfo (): Promise<ChromiumReprocessInfoWithDate> {
+  const response = await axios.get<ChromiumReprocessInfo>(`${POOL_SERVER}/pool/chromium/reprocess-info`)
+  return {
+    last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
+    next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
   }
 }

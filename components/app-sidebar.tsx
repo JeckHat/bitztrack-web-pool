@@ -90,11 +90,11 @@ const data: MenuData[] = [
     icon: GiMiner,
     items: [
       {
-        title: 'Balance & Stats - WIP',
+        title: 'Balance',
         url: '/miner/balance-stats',
       },
       {
-        title: 'Claim rewards',
+        title: 'Claim rewards - WIP',
         // url: '/miner/claim-rewards',
         url: '/work-in-progress',
       },

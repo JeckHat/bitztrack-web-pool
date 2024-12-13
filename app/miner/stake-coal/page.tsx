@@ -204,8 +204,8 @@ export default function StakingPage () {
           <Card>
             <CardHeader>
               <CardTitle>Stake to the Guild</CardTitle>
-              Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? 0}x - Total
-              Stake: {poolStakeAndMultipliers?.guild_stake ?? 0} COAL-SOL
+              Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? '-'}x - Total
+              Stake: {poolStakeAndMultipliers?.guild_stake ?? '-'} COAL-SOL
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
@@ -296,8 +296,8 @@ export default function StakingPage () {
           <Card>
             <CardHeader>
               <CardTitle>Stake to the Pool</CardTitle>
-              Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? 0}x - Total
-              Stake: {poolStakeAndMultipliers?.coal_stake ?? 0} COAL
+              Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? '-'}x - Total
+              Stake: {poolStakeAndMultipliers?.coal_stake ?? '-'} COAL
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">

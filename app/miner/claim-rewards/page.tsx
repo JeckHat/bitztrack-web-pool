@@ -17,7 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui
 export default function Page () {
   const wallet = useWallet()
   const [miningRewards, setMiningRewards] = useState({ coal: 0, ore: 0, chromium: 0 })
-  const [guildStake, setGuildStake] = useState({ staked: 0, estimatedReturn: 0, claimable: 0 })
+  const [guildStake,
+    //setGuildStake
+  ] = useState({ staked: 0, estimatedReturn: 0, claimable: 0 })
   const [lpBalance, setLpBalance] = useState({ staked: 0, wallet: 0 })
   const [unstakeAmount, setUnstakeAmount] = useState('')
 

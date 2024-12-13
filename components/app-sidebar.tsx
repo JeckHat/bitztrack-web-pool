@@ -91,12 +91,11 @@ const data: MenuData[] = [
     items: [
       {
         title: 'Balance & Stats - WIP',
-        // url: "/miner/balance",
-        url: '/work-in-progress',
+        url: '/miner/balance-stats',
       },
       {
-        title: 'Claim rewards - WIP',
-        // url: "/miner/rewards",
+        title: 'Claim rewards',
+        // url: '/miner/claim-rewards',
         url: '/work-in-progress',
       },
       {

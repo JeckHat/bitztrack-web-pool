@@ -1,7 +1,14 @@
 import { BlockhashWithExpiryBlockHeight, PublicKey, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
 import axios from 'axios'
-import { BalanceData, BlockhashData, StakeAndMultipliers, StakeAndMultipliersString } from '../pages/api/apiDataTypes'
+import {
+  BalanceData,
+  BlockhashData,
+  MinerBalance,
+  MinerBalanceString,
+  StakeAndMultipliers,
+  StakeAndMultipliersString
+} from '../pages/api/apiDataTypes'
 import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
 
 export async function getTokenBalance (publicKey: PublicKey, mintAddress: PublicKey): Promise<number> {
@@ -90,5 +97,14 @@ export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliers
     guild_stake: (stakeAndMultipliers.guild_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
     tool_multiplier: stakeAndMultipliers.tool_multiplier.toFixed(2).toString(),
     ore_stake: (stakeAndMultipliers.ore_stake / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
+  }
+}
+
+export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
+  const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/balance?pubkey=${publicKey}`)
+  return {
+    coal: (response.data.coal / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
+    ore: (response.data.ore / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
+    chromium: (response.data.chromium / Math.pow(10, COAL_TOKEN_DECIMALS)).toFixed(2).toString(),
   }
 }

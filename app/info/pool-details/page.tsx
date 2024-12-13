@@ -1,9 +1,30 @@
+'use client'
+
 import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import Link from 'next/link'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { getPoolStakeAndMultipliers } from '../../../lib/poolUtils'
+import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 
 export default function Page () {
+  const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
+
+  useEffect(() => {
+    if (!poolStakeAndMultipliers) {
+      fetchPoolStakeAndMultipliers()
+    }
+  }, [poolStakeAndMultipliers])
+
+  const fetchPoolStakeAndMultipliers = async () => {
+    try {
+      const response = await getPoolStakeAndMultipliers()
+      setPoolStakeAndMultipliers(response)
+    } catch (error) {
+      console.error('Failed to fetch pool stake and multipliers:', error)
+    }
+  }
+
   return (
     <div className="max-w-4xl w-[min(56rem,100vw)] mx-auto px-6 py-10">
       <h1 className="text-4xl font-bold text-center mb-8">The Pool</h1>
@@ -31,7 +52,8 @@ export default function Page () {
                 <li>Easy to setup hotwallet</li>
                 <li>Mine with the same key from multiple devices</li>
                 <li>Option to use a different wallet for withdrawals</li>
-                <li>Pickaxe-boosted rewards for all miners</li>
+                <li>Pickaxe-boosted rewards for all miners
+                  of <strong>{poolStakeAndMultipliers?.tool_multiplier ?? '-'}x</strong></li>
                 <li>Guild membership boost benefits</li>
               </ul>
             </CardContent>

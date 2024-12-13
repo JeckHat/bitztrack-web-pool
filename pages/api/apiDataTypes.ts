@@ -17,3 +17,15 @@ export type StakeAndMultipliersString = {
   tool_multiplier: string,
   ore_stake: string,
 }
+
+export type MinerBalance = {
+  coal: number,
+  ore: number,
+  chromium: number,
+}
+
+export type MinerBalanceString = {
+  coal: string,
+  ore: string,
+  chromium: string,
+}

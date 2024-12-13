@@ -120,7 +120,12 @@ export default function Page () {
 
   return (
     <div className="max-w-4xl w-[min(56rem,100vw)]  mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold mb-4">Miner Balance and Stats</h1>
+      <h1 className="text-4xl font-bold text-center mb-8">Miner balances</h1>
+      <div className="text-center mb-6">
+        <p className="text-lg leading-relaxed">
+          Put a public address in the input field to fetch the miner&#39;s balance.
+        </p>
+      </div>
       <div className="flex mb-4">
         <div className="relative w-full mr-2">
           <AutoComplete selectedValue={publicKey} onSelectedValueChange={setPublicKey} searchValue={publicKey}

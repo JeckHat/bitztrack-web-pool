@@ -56,7 +56,9 @@ export default function Page () {
                 <li>Option to use a different wallet for withdrawals</li>
                 <li>Pickaxe-boosted rewards for all miners
                   of <strong>{poolStakeAndMultipliers?.tool_multiplier ?? '-'}x</strong></li>
-                <li>Guild membership boost benefits</li>
+                <li>Guild membership benefits and boost
+                  of <strong>{poolStakeAndMultipliers?.guild_multiplier ?? '-'}x</strong></li>
+                <li>Stake multiplier of <strong>{poolStakeAndMultipliers?.coal_stake ?? '-'}x</strong></li>
               </ul>
             </CardContent>
           </Card>

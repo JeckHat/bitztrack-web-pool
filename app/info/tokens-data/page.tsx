@@ -16,6 +16,7 @@ export default function Page () {
         <Card>
           <CardHeader>
             <CardTitle>COAL</CardTitle>
+            First and only PoW meme coin on Solana
           </CardHeader>
           <CardContent>
             <TokenPrice
@@ -29,6 +30,7 @@ export default function Page () {
         <Card>
           <CardHeader>
             <CardTitle>ORE</CardTitle>
+            Digital gold on Solana
           </CardHeader>
           <CardContent>
             <TokenPrice

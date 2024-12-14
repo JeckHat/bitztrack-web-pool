@@ -40,6 +40,11 @@ export async function getLatestBlockhash (): Promise<BlockhashWithExpiryBlockHei
   return response.data.latestBlockhash
 }
 
+export async function getServerTimestamp (): Promise<string> {
+  const response = await axios.get(`${POOL_SERVER}/timestamp`)
+  return response.data
+}
+
 export async function getLPStake (publicKey: PublicKey): Promise<number> {
   const response = await axios.get<number>(`${POOL_SERVER}/miner/guild-stake?pubkey=${publicKey.toString()}`)
   return response.data
@@ -115,12 +120,17 @@ export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliers
   }
 }
 
-export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
+export async function getMinerRewardsNumeric (publicKey: string): Promise<MinerBalance> {
   const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
+  return response.data
+}
+
+export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
+  const response = await getMinerRewardsNumeric(publicKey)
   return {
-    coal: response.data.coal.toString(),
-    ore: response.data.ore.toString(),
-    chromium: response.data.chromium.toString(),
+    coal: response.coal.toString(),
+    ore: response.ore.toString(),
+    chromium: response.chromium.toString(),
   }
 }
 

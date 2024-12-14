@@ -108,9 +108,26 @@ export default function Page () {
     }
   }
 
+// Add this function to check if rewards meet the minimum requirements
+  const meetsMinimumRequirements = () => {
+    if (!minerRewards) return false
+    const coalRewards = parseFloat(minerRewards.coal)
+    const oreRewards = parseFloat(minerRewards.ore)
+    return coalRewards >= 5 || oreRewards >= 0.05
+  }
+
+// Update the handleClaimMiningRewards function
   const handleClaimMiningRewards = () => {
-    // Implement claim mining rewards logic
-    console.log('Claiming mining rewards')
+    if (meetsMinimumRequirements()) {
+      // Implement claim mining rewards logic
+      console.log('Claiming mining rewards')
+    } else {
+      toast({
+        title: 'Insufficient Rewards',
+        description: 'You need at least 5 COAL or 0.05 ORE to claim rewards.',
+        variant: 'destructive',
+      })
+    }
   }
 
   const handleUnstake = () => {
@@ -179,9 +196,17 @@ export default function Page () {
               <p>COAL: {minerRewards?.coal || '0'}</p>
               <p>ORE: {minerRewards?.ore || '0'}</p>
               <p>CHROMIUM: {minerRewards?.chromium || '0'}</p>
+              {!meetsMinimumRequirements() && (
+                <p className="text-red-500 mt-2">
+                  Minimum withdrawal: 5 COAL or 0.05 ORE. Your current rewards do not meet this minimum.
+                </p>
+              )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleClaimMiningRewards}><strong>CLAIM ALL MINING REWARDS</strong></Button>
+              <Button onClick={handleClaimMiningRewards}
+                      disabled={!meetsMinimumRequirements()}>
+                <strong>CLAIM ALL MINING REWARDS</strong>
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>

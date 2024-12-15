@@ -199,8 +199,9 @@ export default function Page () {
       </h4>
 
       <Tabs defaultValue="mining" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="mining">Mining Rewards</TabsTrigger>
+          <TabsTrigger value="guild">Guild Rewards</TabsTrigger>
           <TabsTrigger value="unstake">Unstake Guild LP</TabsTrigger>
         </TabsList>
 
@@ -285,6 +286,63 @@ export default function Page () {
           </Card>
         </TabsContent>
 
+        <TabsContent value="guild">
+          <Card>
+            <CardHeader>
+              <CardTitle>Guild LP Staking Rewards</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-muted p-4 rounded-md mb-6">
+                <ul className="list-disc list-inside mb-2">
+                  <li>
+                    Stake your <strong>COAL-SOL LP</strong> tokens in the guild to earn passive rewards.
+                  </li>
+                  <li>
+                    Rewards are distributed automatically every few hours based on your staked amount.
+                  </li>
+                  <li>
+                    You don&#39;t need to actively mine to earn these rewards - they accumulate as long as your LP
+                    tokens
+                    are staked.
+                  </li>
+                  <li>
+                    The COAL + ORE Pool has <strong>partnered</strong> with GPOOL, creating a guild coalition allowing
+                    you to earn
+                    additional
+                    LP rewards.
+                  </li>
+                  <li>
+                    Visit the <a
+                    href="https://dashboard.gpool.cloud/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    GPOOL dashboard
+                  </a> to claim your LP staking rewards.
+                  </li>
+                </ul>
+              </div>
+              <p className="text-yellow-500 font-semibold">
+                Important: The Coal Pool is currently working on implementing direct incentive rewards for LP token
+                staking. This feature will be available soon.
+              </p>
+              {/* Uncomment and update these lines when the feature is implemented
+      <p>LP Staked: {poolStakeAndMultipliers?.total_lp_staked || '0'}</p>
+      <p>Estimated Daily Return: {poolStakeAndMultipliers?.estimated_daily_return || '0'}</p>
+      <p>Claimable COAL: {poolStakeAndMultipliers?.claimable_coal || '0'}</p>
+      */}
+            </CardContent>
+            <CardFooter>
+              {/* Uncomment this button when the claim feature is implemented
+      <Button onClick={handleClaimGuildRewards} disabled={true}>
+        <strong>CLAIM GUILD REWARDS</strong>
+      </Button>
+      */}
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="unstake">
           <Card>
             <CardHeader>
@@ -358,33 +416,4 @@ export default function Page () {
       </Tabs>
     </div>
   )
-}
-
-{/*<TabsTrigger value="guild">Guild Rewards</TabsTrigger>*/}
-
-{/* <TabsContent value="guild">
-          <Card>
-            <CardHeader>
-              <CardTitle>Guild LP Staking Rewards</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="bg-muted p-4 rounded-md mb-6">
-                <p className="mb-2">
-                  Guild rewards are distributed every few hours to users who provide COAL-SOL LP tokens to the
-                  guild.
-                </p>
-                <p>
-                  These rewards accumulate passively - you don&#39;t need to actively mine to earn them. The amount of
-                  rewards is proportional to your staked LP tokens.
-                </p>
-              </div>
-              <p>LP Staked: {poolStakeAndMultipliers?.total_lp_staked || '0'}</p>
-              <p>Estimated Return per Day: {poolStakeAndMultipliers?.estimated_daily_return || '0'}</p>
-              <p>Claimable COAL: {poolStakeAndMultipliers?.claimable_coal || '0'}</p>
-            </CardContent>
-            <CardFooter>
-              <Button onClick={handleClaimGuildRewards}><strong>CLAIM GUILD REWARDS</strong></Button>
-            </CardFooter>
-          </Card>
-        </TabsContent> */
 }

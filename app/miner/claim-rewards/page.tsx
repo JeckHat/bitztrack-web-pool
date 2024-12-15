@@ -18,6 +18,7 @@ import {
   TOKEN_CREATION_AMOUNT_COAL,
   TOKEN_CREATION_AMOUNT_ORE
 } from '../../../lib/claimRewards'
+import { unstakeFromGuild } from '../../../lib/unstakeFromGuild'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -152,14 +153,38 @@ export default function Page () {
     }
   }
 
-  const handleUnstake = () => {
-    // Implement unstake logic
-    console.log('Unstaking', unstakeAmount)
+  const handleUnstake = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      toast({ title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive' })
+      return
+    }
+
+    if (isUnstakeButtonDisabled()) {
+      toast({
+        title: 'Insufficient Amount',
+        description: `You need to provide an amount to unstake. Please enter a valid amount greater than 0 and less than or equal to your staked LP tokens.`,
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setIsClaiming(true) // Start the loading state
+
+    try {
+      await unstakeFromGuild(parseFloat(unstakeAmount), wallet)
+      toast({ title: 'Unstake successful', description: 'Successfully unstaked from guild!', variant: 'default' })
+      fetchData()
+    } catch (error) {
+      console.error('Unstake failed:', error)
+      toast({ title: 'Unstake failed', description: (error as string).toString(), variant: 'destructive' })
+    } finally {
+      setIsClaiming(false) // End the loading state
+    }
   }
 
   const isUnstakeButtonDisabled = () => {
     const amount = parseFloat(unstakeAmount)
-    return isNaN(amount) || amount <= 0 || amount > lpBalance.staked
+    return isNaN(amount) || isNaN(lpBalance.staked) || amount <= 0 || amount > lpBalance.staked || lpBalance.staked <= 0
   }
 
   return (
@@ -188,6 +213,7 @@ export default function Page () {
                   <Button
                     onClick={fetchData}
                     disabled={cooldownRemaining > 0}
+                    size="lg"
                     className="relative"
                   >
                     <RefreshCw className="mr-2 h-4 w-4"/>
@@ -207,14 +233,19 @@ export default function Page () {
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
-                <p className="mb-2">
-                  <strong>COAL</strong> and <strong>ORE</strong> rewards are earned every minute while you&#39;re
-                  actively mining in the pool. These rewards are distributed when a mining transaction is submitted.
-                </p>
-                <p>
-                  <strong>CHROMIUM</strong> is earned each time the pool reprocesses COAL, provided you&#39;ve been
-                  active in the pool during the previous days.
-                </p>
+                <ul className="list-disc list-inside mb-2">
+                  <li><strong>0 transactions fees</strong> are required to claim rewards, they are payed by the pool.
+                  </li>
+                  <li>Unclaimed <strong>COAL</strong> and <strong>ORE</strong> rewards are automatically added to the
+                    pool stake
+                  </li>
+                  <li><strong>COAL</strong> and <strong>ORE</strong> rewards are earned every minute while you&#39;re
+                    actively mining in the pool. These rewards are distributed when a mining transaction is submitted.
+                  </li>
+                  <li><strong>CHROMIUM</strong> is earned each time the pool reprocesses COAL, provided you&#39;ve been
+                    active in the pool during the previous days.
+                  </li>
+                </ul>
               </div>
               <p>COAL: {minerRewards?.coal || '0'}</p>
               <p>ORE: {minerRewards?.ore || '0'}</p>
@@ -237,8 +268,10 @@ export default function Page () {
               )}
             </CardContent>
             <CardFooter>
-              <Button onClick={handleClaimMiningRewards}
-                      disabled={!meetsMinimumRequirements() || isClaiming}>
+              <Button
+                size="lg"
+                className="relative" onClick={handleClaimMiningRewards}
+                disabled={!meetsMinimumRequirements() || isClaiming}>
                 {isClaiming && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
@@ -261,6 +294,7 @@ export default function Page () {
                   <Button
                     onClick={fetchData}
                     disabled={cooldownRemaining > 0}
+                    size="lg"
                     className="relative"
                   >
                     <RefreshCw className="mr-2 h-4 w-4"/>
@@ -280,13 +314,19 @@ export default function Page () {
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
-                <p className="mb-2">
-                  Guild rewards are calculated based on the amount of LP tokens you have staked.
-                </p>
-                <p>
-                  Reducing or removing your staked LP tokens will proportionally decrease the amount of rewards you can
-                  earn. Consider this carefully before unstaking.
-                </p>
+                <ul className="list-disc list-inside mb-2">
+                  <li><strong>0 transactions fees</strong> are required to claim rewards, they are payed by the pool.
+                  </li>
+                  <li>
+                    <strong>Guild rewards</strong> are calculated based on the amount of LP tokens you have staked.
+                  </li>
+                  <li>
+                    Reducing or removing your staked LP tokens will proportionally <strong>decrease the amount of
+                    rewards</strong> you
+                    can
+                    earn. Consider this carefully before unstaking.
+                  </li>
+                </ul>
               </div>
               <p>LP Staked: {lpBalance.staked}</p>
               <p>LP in Wallet: {lpBalance.wallet}</p>
@@ -299,7 +339,19 @@ export default function Page () {
               />
             </CardContent>
             <CardFooter>
-              <Button onClick={handleUnstake} disabled={isUnstakeButtonDisabled()}><strong>UNSTAKE</strong></Button>
+              <Button
+                size="lg"
+                className="relative" onClick={handleUnstake}
+                disabled={isUnstakeButtonDisabled() || isClaiming}>
+                {isClaiming && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <span className={isClaiming ? 'opacity-0' : ''}>
+                    <strong>UNSTAKE</strong>
+                  </span>
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>

@@ -42,15 +42,11 @@ export default function StakingPage () {
         setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
       } else {
         // Only fetch if the cooldown has expired
-        if (wallet.publicKey) {
-          fetchData()
-        }
+        fetchData()
       }
     } else {
       // If there's no stored refresh time, it's the first fetch
-      if (wallet.publicKey) {
-        fetchData()
-      }
+      fetchData()
     }
   }, [wallet.publicKey])
 
@@ -108,6 +104,10 @@ export default function StakingPage () {
           variant: 'destructive',
         })
       }
+    } else {
+      toast({
+        title: 'Wallet connection', description: 'Please connect your wallet first', variant: 'destructive'
+      })
     }
   }
 

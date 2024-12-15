@@ -128,9 +128,9 @@ export async function getMinerRewardsNumeric (publicKey: string): Promise<MinerB
 export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
   const response = await getMinerRewardsNumeric(publicKey)
   return {
-    coal: response.coal.toString(),
-    ore: response.ore.toString(),
-    chromium: response.chromium.toString(),
+    coal: response.coal?.toString() ?? '-',
+    ore: response.ore?.toString() ?? '-',
+    chromium: response.chromium?.toString() ?? '-',
   }
 }
 

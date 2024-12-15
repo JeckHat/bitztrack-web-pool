@@ -112,6 +112,6 @@ export async function stakeToGuild (
   if (response.data === 'SUCCESS') {
     console.log('Successfully staked to guild!')
   } else {
-    console.log('Transaction failed:', response.data)
+    throw new Error('Transaction failed:', response.data)
   }
 }

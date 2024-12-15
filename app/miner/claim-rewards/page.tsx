@@ -11,6 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui
 import { MinerBalanceString } from '../../../pages/api/apiDataTypes'
 import { RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import {
+  claimRewards,
+  MINIMUM_CLAIM_AMOUNT_COAL,
+  MINIMUM_CLAIM_AMOUNT_ORE,
+  TOKEN_CREATION_AMOUNT_COAL,
+  TOKEN_CREATION_AMOUNT_ORE
+} from '../../../lib/claimRewards'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -22,6 +29,7 @@ export default function Page () {
   const [unstakeAmount, setUnstakeAmount] = useState('')
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
+  const [isClaiming, setIsClaiming] = useState(false)
 
   useEffect(() => {
     const storedLastFetchTime = localStorage.getItem('lastClaimRewardsFetchTime')
@@ -113,20 +121,34 @@ export default function Page () {
     if (!minerRewards) return false
     const coalRewards = parseFloat(minerRewards.coal)
     const oreRewards = parseFloat(minerRewards.ore)
-    return coalRewards >= 5 || oreRewards >= 0.05
+    return coalRewards >= MINIMUM_CLAIM_AMOUNT_COAL || oreRewards >= MINIMUM_CLAIM_AMOUNT_ORE
   }
 
-// Update the handleClaimMiningRewards function
-  const handleClaimMiningRewards = () => {
-    if (meetsMinimumRequirements()) {
-      // Implement claim mining rewards logic
-      console.log('Claiming mining rewards')
-    } else {
+  const handleClaimMiningRewards = async () => {
+    if (!wallet.connected || !wallet.publicKey) {
+      toast({ title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive' })
+      return
+    }
+
+    if (!meetsMinimumRequirements()) {
       toast({
         title: 'Insufficient Rewards',
-        description: 'You need at least 5 COAL or 0.05 ORE to claim rewards.',
+        description: `You need at least ${MINIMUM_CLAIM_AMOUNT_COAL} COAL or ${MINIMUM_CLAIM_AMOUNT_ORE} ORE to claim rewards.`,
         variant: 'destructive',
       })
+      return
+    }
+
+    setIsClaiming(true) // Start the loading state
+
+    try {
+      await claimRewards(wallet)
+      toast({ title: 'Claim successful', description: 'Successfully queued claim rewards!', variant: 'default' })
+    } catch (error) {
+      console.error('Claim failed:', error)
+      toast({ title: 'Claim failed', description: (error as string).toString(), variant: 'destructive' })
+    } finally {
+      setIsClaiming(false) // End the loading state
     }
   }
 
@@ -144,10 +166,11 @@ export default function Page () {
     <div className="max-w-4xl w-[min(56rem,100vw)] mx-auto px-6 py-10">
       <h1 className="text-4xl font-bold text-center mb-2">Claim Rewards</h1>
       <h4 className="text-sm text-center mb-1">
-        <strong>Minimum withdrawal: 5 COAL or 0.05 ORE.</strong>
+        <strong>Minimum withdrawal: {MINIMUM_CLAIM_AMOUNT_COAL} COAL or {MINIMUM_CLAIM_AMOUNT_ORE} ORE.</strong>
       </h4>
       <h4 className="text-sm text-center mb-8 italic">
-        Note: A one-time fee of 4 COAL or 0.02 ORE applies if you don&#39;t have an existing token account.
+        Note: A one-time fee of {TOKEN_CREATION_AMOUNT_COAL} COAL or {TOKEN_CREATION_AMOUNT_ORE} ORE applies if you
+        don&#39;t have an existing token account.
       </h4>
 
       <Tabs defaultValue="mining" className="w-full">
@@ -198,14 +221,32 @@ export default function Page () {
               <p>CHROMIUM: {minerRewards?.chromium || '0'}</p>
               {!meetsMinimumRequirements() && (
                 <p className="text-red-500 mt-2">
-                  Minimum withdrawal: 5 COAL or 0.05 ORE. Your current rewards do not meet this minimum.
+                  Minimum withdrawal: {MINIMUM_CLAIM_AMOUNT_COAL} COAL or {MINIMUM_CLAIM_AMOUNT_ORE} ORE. Your current
+                  rewards do not meet this minimum.
                 </p>
+              )}
+              {meetsMinimumRequirements() && (
+                <div>
+                  <p className="text-red-500 mt-2">
+                    Please note: It may take a few minutes for your claimed rewards to appear in your wallet.
+                  </p>
+                  <p className="text-red-500">
+                    If you don&#39;t see your funds after 5-10 minutes, please try claiming again.
+                  </p>
+                </div>
               )}
             </CardContent>
             <CardFooter>
               <Button onClick={handleClaimMiningRewards}
-                      disabled={!meetsMinimumRequirements()}>
-                <strong>CLAIM ALL MINING REWARDS</strong>
+                      disabled={!meetsMinimumRequirements() || isClaiming}>
+                {isClaiming && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <span className={isClaiming ? 'opacity-0' : ''}>
+                    <strong>CLAIM ALL MINING REWARDS</strong>
+                  </span>
               </Button>
             </CardFooter>
           </Card>

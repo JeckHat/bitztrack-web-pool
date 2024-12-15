@@ -58,7 +58,7 @@ export default function Page () {
                   of <strong>{poolStakeAndMultipliers?.tool_multiplier ?? '-'}x</strong></li>
                 <li>Guild membership benefits and boost
                   of <strong>{poolStakeAndMultipliers?.guild_multiplier ?? '-'}x</strong></li>
-                <li>Stake multiplier of <strong>{poolStakeAndMultipliers?.coal_stake ?? '-'}x</strong></li>
+                <li>Stake multiplier of <strong>{poolStakeAndMultipliers?.coal_multiplier ?? '-'}x</strong></li>
               </ul>
             </CardContent>
           </Card>

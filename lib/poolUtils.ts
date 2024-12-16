@@ -46,8 +46,12 @@ export async function getServerTimestamp (): Promise<string> {
 }
 
 export async function getLPStake (publicKey: PublicKey): Promise<number> {
-  const response = await axios.get<number>(`${POOL_SERVER}/miner/guild-stake?pubkey=${publicKey.toString()}`)
-  return response.data
+  try {
+    const response = await axios.get<number>(`${POOL_SERVER}/miner/guild-stake?pubkey=${publicKey.toString()}`)
+    return response.data
+  } catch {
+    return 0
+  }
 }
 
 export async function getFeePayerPubkey (): Promise<PublicKey> {
@@ -121,8 +125,12 @@ export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliers
 }
 
 export async function getMinerRewardsNumeric (publicKey: string): Promise<MinerBalance> {
-  const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
-  return response.data
+  try {
+    const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
+    return response.data
+  } catch {
+    return { coal: 0, ore: 0, chromium: 0 }
+  }
 }
 
 export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
@@ -135,27 +143,42 @@ export async function getMinerRewards (publicKey: string): Promise<MinerBalanceS
 }
 
 export async function getMinerSubmissions (publicKey: string): Promise<SubmissionWithDate[]> {
-  const response = await axios.get<Submission[]>(`${POOL_SERVER}/miner/submissions?pubkey=${publicKey}`)
-  return response.data.map(x => {
-    const sub: SubmissionWithDate = {
-      created_at: parseISO(x.created_at + '.000Z'),
-      difficulty: x.difficulty,
-      nonce: x.nonce,
-    }
-    return sub
-  })
+  try {
+    const response = await axios.get<Submission[]>(`${POOL_SERVER}/miner/submissions?pubkey=${publicKey}`)
+    return response.data.map(x => {
+      const sub: SubmissionWithDate = {
+        created_at: parseISO(x.created_at + '.000Z'),
+        difficulty: x.difficulty,
+        nonce: x.nonce,
+      }
+      return sub
+    })
+  } catch {
+    return []
+  }
 }
 
 export async function getLastMinerSubmission (publicKey: string): Promise<SubmissionWithDate> {
   const submissions = await getMinerSubmissions(publicKey)
   console.log('submissions', submissions)
-  return submissions[0]
+  return submissions.length > 0 ? submissions[0] : {
+    difficulty: 0,
+    created_at: new Date(),
+    nonce: 0
+  }
 }
 
 export async function getPoolChromiumReprocessingInfo (): Promise<ChromiumReprocessInfoWithDate> {
-  const response = await axios.get<ChromiumReprocessInfo>(`${POOL_SERVER}/pool/chromium/reprocess-info`)
-  return {
-    last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
-    next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
+  try {
+    const response = await axios.get<ChromiumReprocessInfo>(`${POOL_SERVER}/pool/chromium/reprocess-info`)
+    return {
+      last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
+      next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
+    }
+  } catch {
+    return {
+      last_reprocess: new Date(),
+      next_reprocess: new Date(),
+    }
   }
 }

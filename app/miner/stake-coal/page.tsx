@@ -66,47 +66,41 @@ export default function StakingPage () {
   }, [lastRefreshTime])
 
   const fetchData = async () => {
-    if (wallet.publicKey) {
-      if (cooldownRemaining > 0) {
-        toast({
-          title: 'Cooldown Active',
-          description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
-          variant: 'destructive',
-        })
-        return
-      }
-
-      try {
-        const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
-          getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS),
-          getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS),
-          getPoolStakeAndMultipliers()
-        ])
-
-        setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
-        setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
-        setPoolStakeAndMultipliers(poolStakeData)
-
-        const now = Date.now()
-        setLastRefreshTime(now)
-        localStorage.setItem('lastRefreshTime', now.toString())
-        setCooldownRemaining(COOLDOWN_DURATION / 1000) // Set cooldown to full duration
-
-        toast({
-          title: 'Data Fetched',
-          description: 'Your balance has been updated.',
-        })
-      } catch (error) {
-        console.error('Failed to fetch data:', error)
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch data. Please try again.',
-          variant: 'destructive',
-        })
-      }
-    } else {
+    if (cooldownRemaining > 0) {
       toast({
-        title: 'Wallet connection', description: 'Please connect your wallet first', variant: 'destructive'
+        title: 'Cooldown Active',
+        description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
+        (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS) : 0),
+        (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS) : 0),
+        getPoolStakeAndMultipliers()
+      ])
+
+      setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
+      setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
+      setPoolStakeAndMultipliers(poolStakeData)
+
+      const now = Date.now()
+      setLastRefreshTime(now)
+      localStorage.setItem('lastRefreshTime', now.toString())
+      setCooldownRemaining(COOLDOWN_DURATION / 1000) // Set cooldown to full duration
+
+      toast({
+        title: 'Data Fetched',
+        description: 'Your balance has been updated.',
+      })
+    } catch (error) {
+      console.error('Failed to fetch data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch data. Please try again.',
+        variant: 'destructive',
       })
     }
   }

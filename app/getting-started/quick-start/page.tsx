@@ -102,7 +102,7 @@ export default function Page () {
         <Card className="px-6 py-4">
           <CardTitle><h2 className="text-2xl font-semibold mb-4">2. Install the Mining Client</h2></CardTitle>
           <CardContent>
-            <p>Now that Rust is installed, you can install the COAL + ORE mining client using Cargo:</p>
+            <p>Now that Rust is installed, you can install the Excalivator mining client using Cargo:</p>
           </CardContent>
           <CardFooter>
             <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">

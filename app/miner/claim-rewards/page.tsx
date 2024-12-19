@@ -306,7 +306,8 @@ export default function Page () {
                     are staked.
                   </li>
                   <li>
-                    The COAL + ORE Pool has <strong>partnered</strong> with GPOOL, creating a guild coalition allowing
+                    The Excalivator Mining Pool has <strong>partnered</strong> with GPOOL, creating a guild coalition
+                    allowing
                     you to earn
                     additional
                     LP rewards.

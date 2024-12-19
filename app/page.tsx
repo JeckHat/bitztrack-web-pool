@@ -2,46 +2,60 @@ import { Button } from '../components/ui/button'
 import Link from 'next/link'
 import { Card } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
+import Image from 'next/image'
 
-export default function Page() {
+export default function Page () {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4">
       {/* Hero Section */}
-      <Card className="py-10 flex-1 bg-gradient-to-b from-gray-100 via-stone-100 to-white dark:from-gray-900 dark:via-stone-800 dark:to-black">
-        <div className="container mx-auto px-4 h-full ">
+      <Card
+        className="py-10 flex-1 bg-cover bg-center relative"
+        style={{ backgroundImage: 'url(\'/images/background/excalivator_bg_5.png\')' }}>
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-75"></div>
+        <div className="container mx-auto px-4 h-full relative">
           <header className="text-center">
-            <h1 className="text-5xl font-extrabold mb-4">Welcome to the COAL + ORE Mining Pool</h1>
+            <div className="flex items-center justify-center mb-4">
+              <Image
+                src="/images/excalivator-logo-small-no-bg.png"
+                alt="Excalivator Logo"
+                width={60}
+                height={60}
+                className="mr-4"
+              />
+              <h1 className="text-5xl font-extrabold text-white">Welcome to the Excalivator Mining Pool</h1>
+            </div>
             <p className="text-xl font-light">Your Gateway to Efficient, Multi-Token Crypto Mining on Solana</p>
           </header>
 
           <Tabs defaultValue="overview" className="mt-10">
             <div className="flex flex-row w-full justify-center">
-            <TabsList className="min-w-[50%] grid grid-cols-3 h-fit">
-              <TabsTrigger
-                className="text-lg font-medium"
-                value="overview"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                className="text-lg font-medium"
-                value="features"
-              >
-                Features
-              </TabsTrigger>
-              <TabsTrigger
-                className="text-lg font-medium"
-                value="reprocessing"
-              >
-                Reprocessing
-              </TabsTrigger>
-            </TabsList>
+              <TabsList className="min-w-[50%] grid grid-cols-3 h-fit">
+                <TabsTrigger
+                  className="text-lg font-medium"
+                  value="overview"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  className="text-lg font-medium"
+                  value="features"
+                >
+                  Features
+                </TabsTrigger>
+                <TabsTrigger
+                  className="text-lg font-medium"
+                  value="reprocessing"
+                >
+                  Reprocessing
+                </TabsTrigger>
+              </TabsList>
             </div>
             <TabsContent value="overview" className="mt-6">
-              <h2 className="text-3xl font-bold mb-4">What is the COAL + ORE Mining Pool?</h2>
+              <h2 className="text-3xl font-bold mb-4">What is the Excalivator Mining Pool?</h2>
               <p className="text-lg leading-relaxed">
-                The COAL + ORE Mining Pool is an innovative, open-source cryptocurrency mining platform built on the
+                The Excalivator Mining Pool is an innovative, open-source cryptocurrency mining platform built on the
                 Solana blockchain. Designed for both novice and experienced miners, the pool enables simultaneous mining
                 of <strong>COAL</strong> and <strong>ORE</strong>, along with an additional
                 token, <strong>CHROMIUM</strong>, through a
@@ -50,7 +64,7 @@ export default function Page() {
             </TabsContent>
 
             <TabsContent value="features" className="mt-6">
-              <h2 className="text-3xl font-bold mb-4">Why Choose COAL + ORE?</h2>
+              <h2 className="text-3xl font-bold mb-4">Why Choose Excalivator?</h2>
               <ul className="list-disc list-inside space-y-2">
                 <li><strong>Triple Token Advantage</strong>: Mine COAL, ORE, and CHROMIUM in a single process.</li>
                 <li><strong>No Entry Fees</strong>: Join the pool completely free of charge—no hidden costs or setup
@@ -77,7 +91,7 @@ export default function Page() {
       <section className="text-center py-5">
         <h2 className="text-4xl font-bold mb-4">Ready to Get Started?</h2>
         <p className="text-lg leading-relaxed mb-6">
-          Join the COAL + ORE Mining Pool today and become part of the future of decentralized, multi-token mining.
+          Join the Excalivator Mining Pool today and become part of the future of decentralized, multi-token mining.
         </p>
         <Link href="/getting-started/quick-start" passHref>
           <Button size="lg">
@@ -167,12 +181,12 @@ export default function Page() {
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Solana digital gold.
               </p>
-              </Card>
+            </Card>
           </a>
         </div>
 
       </div>
 
     </div>
-  );
+  )
 }

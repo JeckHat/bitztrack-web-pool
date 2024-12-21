@@ -65,6 +65,25 @@ export default function StakingPage () {
     return () => clearInterval(timer)
   }, [lastRefreshTime])
 
+  useEffect(() => {
+    if (!wallet.publicKey) {
+      return
+    }
+    getData()
+  }, [wallet.publicKey])
+
+  const getData = async () => {
+    const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
+      (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS) : 0),
+      (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS) : 0),
+      getPoolStakeAndMultipliers()
+    ])
+
+    setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
+    setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
+    setPoolStakeAndMultipliers(poolStakeData)
+  }
+
   const fetchData = async () => {
     if (cooldownRemaining > 0) {
       toast({
@@ -76,15 +95,8 @@ export default function StakingPage () {
     }
 
     try {
-      const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
-        (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS) : 0),
-        (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS) : 0),
-        getPoolStakeAndMultipliers()
-      ])
 
-      setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
-      setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
-      setPoolStakeAndMultipliers(poolStakeData)
+      await getData()
 
       const now = Date.now()
       setLastRefreshTime(now)

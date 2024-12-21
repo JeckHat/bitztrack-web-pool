@@ -156,7 +156,7 @@ export default function Page () {
                   alt="COAL Logo"
                 />
               </div>
-              <h3 className="text-2xl font-bold">COAL Website</h3>
+              <h3 className="text-2xl font-bold">$COAL</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 The minechain.
               </p>
@@ -177,7 +177,7 @@ export default function Page () {
                 alt="ORE Logo"
                 className="w-16 h-16 mb-4 transition-transform group-hover:scale-110"
               />
-              <h3 className="text-2xl font-bold">ORE Website</h3>
+              <h3 className="text-2xl font-bold">$ORE</h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2">
                 Solana digital gold.
               </p>

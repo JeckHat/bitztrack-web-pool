@@ -22,7 +22,7 @@ export default function Page () {
             <TokenPrice
               tokenId="coal-2"
               iconUrl="/images/coal-logo.png"
-              jupiterLink="https://jup.ag/swap/SOL-coal"
+              jupiterLink="https://jup.ag/swap/SOL-E3yUqBNTZxV8ELvW99oRLC7z4ddbJqqR4NphwrMug9zu"
             />
           </CardContent>
         </Card>

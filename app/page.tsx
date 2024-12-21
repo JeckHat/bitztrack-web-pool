@@ -10,7 +10,7 @@ export default function Page () {
     <div className="flex flex-1 flex-col gap-6 p-4">
       {/* Hero Section */}
       <Card
-        className="py-10 flex-1 bg-cover bg-center relative"
+        className="py-10 flex-1 bg-cover bg-center relative text-white overflow-hidden"
         style={{ backgroundImage: 'url(\'/images/background/excalivator_bg_5.png\')' }}>
         {/* Overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-75"></div>
@@ -24,7 +24,7 @@ export default function Page () {
                 height={60}
                 className="mr-4"
               />
-              <h1 className="text-5xl font-extrabold text-white">Welcome to the Excalivator Mining Pool</h1>
+              <h1 className="text-5xl font-extrabold ">Welcome to the Excalivator Mining Pool</h1>
             </div>
             <p className="text-xl font-light">Your Gateway to Efficient, Multi-Token Crypto Mining on Solana</p>
           </header>

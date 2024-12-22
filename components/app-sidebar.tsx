@@ -102,9 +102,8 @@ const data: MenuData[] = [
         url: '/miner/stake-coal',
       },
       {
-        title: 'Web mining - WIP',
-        // url: "/miner/web-mining",
-        url: '/work-in-progress',
+        title: 'Web mining',
+        url: '/miner/web-mining',
       },
     ],
   },

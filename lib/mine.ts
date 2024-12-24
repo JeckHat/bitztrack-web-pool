@@ -81,7 +81,7 @@ export async function getServerWS (
   const ws = new WebSocket(wsUrl.toString())
 
   return new Promise((resolve, reject) => {
-    ws.onopen = (event) => {
+    ws.onopen = () => {
       // console.log('Connected to mining server', event)
       if (!wallet.publicKey) {
         throw new Error('User wallet is not available')

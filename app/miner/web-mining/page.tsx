@@ -222,7 +222,7 @@ export default function WebMiner () {
       }
     }
 
-    ws.onclose = (evt) => {
+    ws.onclose = () => {
       // console.log('Disconnected from mining server', evt)
       if (isMining) {
         mine() // Reconnect if still mining

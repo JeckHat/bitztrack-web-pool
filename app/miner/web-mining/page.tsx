@@ -46,7 +46,7 @@ export default function WebMiner () {
   const [maxThread, setMaxThread] = useState(0)
 
   useEffect(() => {
-    console.log('hardwareConcurrency', window.navigator.hardwareConcurrency)
+    // console.log('hardwareConcurrency', window.navigator.hardwareConcurrency)
     setMaxThread(window.navigator.hardwareConcurrency)
     setThreadCount(window.navigator.hardwareConcurrency)
   }, [])
@@ -67,7 +67,7 @@ export default function WebMiner () {
       return
     }
     numberOfWorkers = threadCount
-    console.log('setup workers', numberOfWorkers)
+    // console.log('setup workers', numberOfWorkers)
 
     for (const worker of workers) {
       worker.postMessage({ type: 'Dispose' })
@@ -94,10 +94,10 @@ export default function WebMiner () {
 
         workerDone = workerDone + 1
 
-        console.log('worker done', workerDone)
+        // console.log('worker done', workerDone)
 
         if (workerDone >= numberOfWorkers) {
-          console.log('bestMiningResult', bestMiningResult)
+          // console.log('bestMiningResult', bestMiningResult)
 
           if (bestMiningResult) {
             await sendSubmission(bestMiningResult)
@@ -129,7 +129,7 @@ export default function WebMiner () {
   }
 
   const stopMining = () => {
-    console.log('Stopping mining', minerWs)
+    // console.log('Stopping mining', minerWs)
     isMining = false
     setViewIsMining(false)
     if (minerWs) {
@@ -143,12 +143,12 @@ export default function WebMiner () {
   }
 
   const mine = async () => {
-    console.log('isMining', isMining)
+    // console.log('isMining', isMining)
     if (!isMining) return
     if (!wallet.publicKey) return
 
     if (minerWs) {
-      console.log('Already mining, closing existing connection')
+      //  console.log('Already mining, closing existing connection')
       minerWs.close()
       minerWs = null
     }
@@ -157,7 +157,7 @@ export default function WebMiner () {
 
     minerWs = ws
 
-    console.log('Connected to mining server')
+    // console.log('Connected to mining server')
 
     ws.onmessage = async (event) => {
       if (event.data instanceof Blob) {
@@ -166,7 +166,7 @@ export default function WebMiner () {
 
         const messageType = uint8Array[0]
 
-        console.log('messageType -->', messageType)
+        // console.log('messageType -->', messageType)
 
         switch (messageType) {
           case 0: // StartMining
@@ -193,7 +193,7 @@ export default function WebMiner () {
               const dataView = new DataView(uint8Array.buffer, 1) // Skip the first byte (message type)
               const poolSubmissionResult = deserializeServerMessagePoolSubmissionResult(dataView, 0)
 
-              console.log('poolSubmissionResult', poolSubmissionResult)
+              // console.log('poolSubmissionResult', poolSubmissionResult)
 
               const poolSubmissionMessage: ServerMessage = {
                 type: 'PoolSubmissionResult',
@@ -207,10 +207,10 @@ export default function WebMiner () {
             break
 
           default:
-            console.log('Failed to parse server message type')
+          // console.log('Failed to parse server message type')
         }
       } else {
-        console.log('Received non-Blob message:', event.data)
+        // console.log('Received non-Blob message:', event.data)
         setServerMessage([event.data])
       }
     }
@@ -223,7 +223,7 @@ export default function WebMiner () {
     }
 
     ws.onclose = (evt) => {
-      console.log('Disconnected from mining server', evt)
+      // console.log('Disconnected from mining server', evt)
       if (isMining) {
         mine() // Reconnect if still mining
       }
@@ -245,17 +245,17 @@ export default function WebMiner () {
   const handleServerMessage = async (message: ServerMessage) => {
     switch (message.type) {
       case 'StartMining':
-        console.log('Received StartMining message:')
-        console.log('Challenge:', Buffer.from(message.challenge).toString('hex'))
-        console.log('Nonce Range:', message.nonceRange[0], '-', message.nonceRange[1])
-        console.log('Cutoff:', message.cutoff)
+        // console.log('Received StartMining message:')
+        // console.log('Challenge:', Buffer.from(message.challenge).toString('hex'))
+        // console.log('Nonce Range:', message.nonceRange[0], '-', message.nonceRange[1])
+        // console.log('Cutoff:', message.cutoff)
         handleStartMining(message.challenge, message.nonceRange, Number(message.cutoff) - 1)
         break
       case 'PoolSubmissionResult':
-        console.log('Received PoolSubmissionResult:')
-        console.log('Difficulty:', message.data.difficulty)
-        console.log('Best Nonce:', message.data.bestNonce)
-        console.log('Active Miners:', message.data.activeMiners)
+        // console.log('Received PoolSubmissionResult:')
+        // console.log('Difficulty:', message.data.difficulty)
+        // console.log('Best Nonce:', message.data.bestNonce)
+        // console.log('Active Miners:', message.data.activeMiners)
         setServerMessage([`Active Miners: ${message.data.activeMiners}`, `Pool Difficulty: ${message.data.difficulty}`])
         setOreLastSubmission(message.data.oreDetails.rewardDetails.minerEarnedRewards)
         setCoalLastSubmission(message.data.coalDetails.rewardDetails.minerEarnedRewards)
@@ -299,11 +299,11 @@ export default function WebMiner () {
       // Send the binary message
       minerWs.send(binData)
 
-      console.log('Submission sent:', {
+      /*console.log('Submission sent:', {
         nonce: threadSubmission.nonce,
         difficulty: threadSubmission.difficulty,
         digest: Array.from(threadSubmission.d).map(b => b.toString(16).padStart(2, '0')).join('')
-      })
+      })*/
 
     } catch (error) {
       console.error('Failed to send submission:', error)
@@ -323,7 +323,7 @@ export default function WebMiner () {
       // Send the reset message through WebSocket
       minerWs.send(resetMessage)
 
-      console.log('Reset message sent to server')
+      // console.log('Reset message sent to server')
 
       // Reset local state
       /*setTotalHashes(0);
@@ -352,7 +352,7 @@ export default function WebMiner () {
 
     const miningTme = (_lastSubmissionTime - miningStartedTime) / 1000
 
-    console.log('totalHashes', totalHashes, miningTme)
+    // console.log('totalHashes', totalHashes, miningTme)
 
     if (miningTme > 0) {
       setHashRate(Math.round(totalHashes / miningTme))
@@ -366,7 +366,7 @@ export default function WebMiner () {
     totalHashes = 0
     bestDifficulty = 0
 
-    console.log('finish mining')
+    // console.log('finish mining')
     // Reset the mining system (you might need to implement this separately)
     await resetMiningSystem()
     // Sleep for a buffer time (commented out in the Rust code)
@@ -401,9 +401,9 @@ export default function WebMiner () {
   const handleStartMining = (challenge: Uint8Array, [nonceRangeStart, nonceRangeEnd]: [bigint, bigint], cutoff: number) => {
     // Extract challenge (32 bytes), difficulty (8 bytes), and nonce range (16 bytes)
 
-    console.log('Challenge:', challenge)
-    console.log('nonceRange:', nonceRangeStart, ' - ', nonceRangeEnd)
-    console.log('cutoff:', cutoff)
+    // console.log('Challenge:', challenge)
+    // console.log('nonceRange:', nonceRangeStart, ' - ', nonceRangeEnd)
+    // console.log('cutoff:', cutoff)
 
     workerDone = 0
     bestMiningResult = null
@@ -415,7 +415,7 @@ export default function WebMiner () {
     // setBestDifficulty(bestDifficulty)
 
     // handle mining loop
-    console.log('mining loop')
+    // console.log('mining loop')
 
     /*for (const worker of workers) {
       worker.postMessage({ type: 'Dispose' })
@@ -426,7 +426,7 @@ export default function WebMiner () {
     const noncesPerWorker = Math.ceil((Number(nonceRangeEnd) - Number(nonceRangeStart)) / numberOfWorkers)
 
     for (let i = 0; i < workers.length; i++) {
-      console.log('workers[i]', workers[i])
+      // console.log('workers[i]', workers[i])
       const workerNonceStart = BigInt(Number(nonceRangeStart) + i * noncesPerWorker)
       const workerNonceEnd = BigInt(Math.min(Number(workerNonceStart) + noncesPerWorker - 1, Number(nonceRangeEnd)))
 

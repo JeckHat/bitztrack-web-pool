@@ -1,7 +1,6 @@
 import { WalletContextState } from '@solana/wallet-adapter-react'
 import { COAL_TOKEN_DECIMALS, POOL_WSS_SERVER } from './constants'
 import { getServerTimestamp } from './poolUtils'
-import { PublicKey } from '@solana/web3.js'
 
 export type RewardDetails = {
   totalBalance: number;
@@ -83,7 +82,7 @@ export async function getServerWS (
 
   return new Promise((resolve, reject) => {
     ws.onopen = (event) => {
-      console.log('Connected to mining server', event)
+      // console.log('Connected to mining server', event)
       if (!wallet.publicKey) {
         throw new Error('User wallet is not available')
       }
@@ -106,7 +105,7 @@ export async function getServerWS (
         // binData.set(signature, 41) // Rest is the signature
 
         ws.send(binData)
-        console.log('Sent Ready message')
+        // console.log('Sent Ready message')
 
         resolve(ws)
       } catch (error) {
@@ -125,36 +124,36 @@ export function deserializeServerMessagePoolSubmissionResult (dataView: DataView
   const difficulty = dataView.getUint32(offset, true)
   offset += 4
 
-  console.log('difficulty -->', difficulty)
+  // console.log('difficulty -->', difficulty)
 
   const challenge = new Uint8Array(dataView.buffer, offset, 32)
   offset += 32
 
-  console.log('challenge -->', challenge)
+  // console.log('challenge -->', challenge)
 
   const bestNonce = dataView.getBigUint64(offset, true)
   offset += 8
 
-  console.log('bestNonce -->', bestNonce)
+  // console.log('bestNonce -->', bestNonce)
 
   const activeMiners = dataView.getUint32(offset, true)
   offset += 4
 
-  console.log('activeMiners -->', activeMiners)
+  // console.log('activeMiners -->', activeMiners)
 
   const coalDetails = deserializeCoalDetails(dataView, offset)
   offset += sizeOfCoalDetails()
 
-  console.log('coalDetails -->', coalDetails)
+  // console.log('coalDetails -->', coalDetails)
 
   const oreDetails = deserializeOreDetails(dataView, offset)
   offset += sizeOfOreDetails()
 
-  console.log('oreDetails -->', oreDetails)
+  // console.log('oreDetails -->', oreDetails)
 
   const minerDetails = deserializeMinerDetails(dataView, dataView.byteLength - sizeOfMinerDetails() + 1)
 
-  console.log('minerDetails -->', minerDetails)
+  // console.log('minerDetails -->', minerDetails)
 
   return {
     difficulty,
@@ -169,19 +168,19 @@ export function deserializeServerMessagePoolSubmissionResult (dataView: DataView
 
 function deserializeRewardDetails (dataView: DataView, offset: number): RewardDetails {
   const totalBalance = dataView.getFloat64(offset, true)
-  console.log('totalBalance', totalBalance)
+  // console.log('totalBalance', totalBalance)
   offset += 8
   const totalRewards = dataView.getFloat64(offset, true)
-  console.log('totalRewards', totalRewards)
+  // console.log('totalRewards', totalRewards)
   offset += 8
   const minerSuppliedDifficulty = dataView.getUint32(offset, true)
-  console.log('minerSuppliedDifficulty', minerSuppliedDifficulty)
+  // console.log('minerSuppliedDifficulty', minerSuppliedDifficulty)
   offset += 4
   const minerEarnedRewards = dataView.getFloat64(offset, true)
-  console.log('minerEarnedRewards', minerEarnedRewards)
+  // console.log('minerEarnedRewards', minerEarnedRewards)
   offset += 8
   const minerPercentage = dataView.getFloat64(offset, true)
-  console.log('minerPercentage', minerPercentage)
+  // console.log('minerPercentage', minerPercentage)
   offset += 8
 
   return {
@@ -197,22 +196,22 @@ function deserializeCoalDetails (dataView: DataView, offset: number): CoalDetail
   const rewardDetails = deserializeRewardDetails(dataView, offset)
   offset += sizeOfRewardDetails()
 
-  console.log('rewardDetails', rewardDetails)
+  // console.log('rewardDetails', rewardDetails)
 
   const topStake = dataView.getFloat64(offset, true)
-  console.log('topStake', topStake)
+  // console.log('topStake', topStake)
   offset += 8
   const stakeMultiplier = dataView.getFloat64(offset, true)
-  console.log('stakeMultiplier', stakeMultiplier)
+  // console.log('stakeMultiplier', stakeMultiplier)
   offset += 8
   const guildTotalStake = dataView.getFloat64(offset, true)
-  console.log('guildTotalStake', guildTotalStake)
+  // console.log('guildTotalStake', guildTotalStake)
   offset += 8
   const guildMultiplier = dataView.getFloat64(offset, true)
-  console.log('guildMultiplier', guildMultiplier)
+  // console.log('guildMultiplier', guildMultiplier)
   offset += 8
   const toolMultiplier = dataView.getFloat64(offset, true)
-  console.log('toolMultiplier', toolMultiplier)
+  // console.log('toolMultiplier', toolMultiplier)
   offset += 8
 
   return {
@@ -253,10 +252,10 @@ function deserializeOreDetails (dataView: DataView, offset: number): OreDetails 
   offset += sizeOfRewardDetails()
 
   const topStake = dataView.getFloat64(offset, true)
-  console.log('topStake', topStake)
+  // console.log('topStake', topStake)
   offset += 8
   const stakeMultiplier = dataView.getFloat64(offset, true)
-  console.log('stakeMultiplier', stakeMultiplier)
+  // console.log('stakeMultiplier', stakeMultiplier)
   offset += 8
 
   const oreBoosts: OreBoost[] = []
@@ -264,7 +263,7 @@ function deserializeOreDetails (dataView: DataView, offset: number): OreDetails 
     const oreBoost = deserializeOreBoost(dataView, offset)
     oreBoosts.push(oreBoost)
     offset += sizeOfOreBoost()
-    console.log(`OreBoost ${i}:`, oreBoost)
+    // console.log(`OreBoost ${i}:`, oreBoost)
   }
 
   return {
@@ -277,21 +276,21 @@ function deserializeOreDetails (dataView: DataView, offset: number): OreDetails 
 
 function deserializeMinerDetails (dataView: DataView, offset: number): MinerDetails {
   const totalChromium = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
-  console.log('totalChromium', totalChromium)
+  // console.log('totalChromium', totalChromium)
   offset += 8
   const totalCoal = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
-  console.log('totalCoal', totalCoal)
+  // console.log('totalCoal', totalCoal)
   offset += 8
   const totalOre = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
-  console.log('totalOre', totalOre)
+  // console.log('totalOre', totalOre)
   offset += 8
 
   const guildAddress = new Uint8Array(dataView.buffer, offset, 32)
   offset += 32
   const minerAddress = new Uint8Array(dataView.buffer, offset, 32)
 
-  console.log('guildAddress addy ->', (new PublicKey(guildAddress)).toString())
-  console.log('miner addy ->', (new PublicKey(minerAddress)).toString())
+  // console.log('guildAddress addy ->', (new PublicKey(guildAddress)).toString())
+  // console.log('miner addy ->', (new PublicKey(minerAddress)).toString())
 
   return {
     totalChromium,

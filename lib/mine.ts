@@ -1,5 +1,5 @@
 import { WalletContextState } from '@solana/wallet-adapter-react'
-import { POOL_WSS_SERVER } from './constants'
+import { COAL_TOKEN_DECIMALS, POOL_WSS_SERVER } from './constants'
 import { getServerTimestamp } from './poolUtils'
 import { PublicKey } from '@solana/web3.js'
 
@@ -276,13 +276,13 @@ function deserializeOreDetails (dataView: DataView, offset: number): OreDetails 
 }
 
 function deserializeMinerDetails (dataView: DataView, offset: number): MinerDetails {
-  const totalChromium = dataView.getFloat64(offset, true)
+  const totalChromium = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
   console.log('totalChromium', totalChromium)
   offset += 8
-  const totalCoal = dataView.getFloat64(offset, true)
+  const totalCoal = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
   console.log('totalCoal', totalCoal)
   offset += 8
-  const totalOre = dataView.getFloat64(offset, true)
+  const totalOre = Number(dataView.getFloat64(offset, true)) / Math.pow(10, COAL_TOKEN_DECIMALS)
   console.log('totalOre', totalOre)
   offset += 8
 

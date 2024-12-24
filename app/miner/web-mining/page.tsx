@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useWallet } from '@solana/wallet-adapter-react'
 import {
   deserializeServerMessagePoolSubmissionResult,
@@ -8,23 +8,107 @@ import {
   MiningResult,
   ServerMessage,
 } from '../../../lib/mine'
-import { signUpMiner } from '../../../lib/poolUtils'
+import { getMinerRewardsNumeric, signUpMiner } from '../../../lib/poolUtils'
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
+import { Button } from '../../../components/ui/button'
+import { COAL_TOKEN_DECIMALS } from '../../../lib/constants'
+import Link from 'next/link'
 
 let minerWs: WebSocket | null = null
 let workers: Worker[] = []
+let workerDone = 0
+let bestMiningResult: MiningResult | null = null
+let totalHashes: number = 0
+let bestDifficulty: number = 0
+let numberOfWorkers: number = 0
+let miningStartedTime: number = 0
+let isMining = false
 
 export default function WebMiner () {
+
   const wallet = useWallet()
 
-  const [isMining, setIsMining] = useState(false)
+  const [viewIsMining, setViewIsMining] = useState(false)
   const [hashRate, setHashRate] = useState(0)
-  const [totalHashes, setTotalHashes] = useState(0)
-  const [bestDifficulty, setBestDifficulty] = useState(0)
-  const [miningStartedTime, setMiningStartedTime] = useState(0)
+  const [viewTotalHashes, setViewTotalHashes] = useState(0)
+  const [viewBestDifficulty, setViewBestDifficulty] = useState(0)
+  const [viewMiningStartedTime, setViewMiningStartedTime] = useState(0)
   const [lastSubmissionTime, setLastSubmissionTime] = useState(0)
-  const [miningTme, setMiningTme] = useState(0)
-  const [lastSubmission, setLastSubmission] = useState<string | null>(null)
-  const [serverMessage, setServerMessage] = useState<string | null>(null)
+  const [timeFromLastSubmission, setTimeFromLastSubmission] = useState(0)
+  const [coalLastSubmission, setCoalLastSubmission] = useState(0)
+  const [oreLastSubmission, setOreLastSubmission] = useState(0)
+  const [coalTotal, setCoalTotal] = useState(0)
+  const [oreTotal, setOreTotal] = useState(0)
+  const [chromiumTotal, setChromiumTotal] = useState(0)
+  const [serverMessage, setServerMessage] = useState<string[]>([])
+  const [threadCount, setThreadCount] = useState(0
+  )
+  const [maxThread, setMaxThread] = useState(0)
+
+  useEffect(() => {
+    console.log('hardwareConcurrency', window.navigator.hardwareConcurrency)
+    setMaxThread(window.navigator.hardwareConcurrency)
+    setThreadCount(window.navigator.hardwareConcurrency)
+  }, [])
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (isMining) {
+      interval = setInterval(() => {
+        setTimeFromLastSubmission(prevTime => prevTime + 1)
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [lastSubmissionTime])
+
+  const setupWorkers = () => {
+    if (!isMining) return
+    if (!wallet.publicKey) {
+      return
+    }
+    numberOfWorkers = threadCount
+    console.log('setup workers', numberOfWorkers)
+
+    for (const worker of workers) {
+      worker.postMessage({ type: 'Dispose' })
+      worker.terminate()
+    }
+    workers = []
+
+    workerDone = 0
+
+    for (let i = 0; i < numberOfWorkers; i++) {
+      const worker = new Worker('/worker/miningWorker.js', { name: 'miner_' + i })
+      worker.postMessage({ type: 'Init' })
+      worker.onmessage = async (e: MessageEvent<MiningResult>) => {
+
+        totalHashes = totalHashes + Number(e.data.total_hashes)
+
+        if (e.data.best_difficulty > bestDifficulty) {
+          bestDifficulty = e.data.best_difficulty
+        }
+
+        if (!bestMiningResult || e.data.best_difficulty > bestMiningResult.best_difficulty) {
+          bestMiningResult = e.data
+        }
+
+        workerDone = workerDone + 1
+
+        console.log('worker done', workerDone)
+
+        if (workerDone >= numberOfWorkers) {
+          console.log('bestMiningResult', bestMiningResult)
+
+          if (bestMiningResult) {
+            await sendSubmission(bestMiningResult)
+          }
+          finishMining()
+        }
+      }
+
+      workers.push(worker)
+    }
+  }
 
   const startMining = async () => {
     if (!wallet.publicKey) {
@@ -34,7 +118,10 @@ export default function WebMiner () {
 
     try {
       await signUpMiner(wallet.publicKey.toString())
-      setIsMining(true)
+      setupUserTotals()
+      isMining = true
+      setViewIsMining(true)
+      setupWorkers()
       mine()
     } catch (error) {
       console.error('Failed to start mining:', error)
@@ -42,14 +129,14 @@ export default function WebMiner () {
   }
 
   const stopMining = () => {
-    console.log('Stopping mining')
-    setIsMining(false)
+    console.log('Stopping mining', minerWs)
+    isMining = false
+    setViewIsMining(false)
     if (minerWs) {
       minerWs.close()
       minerWs = null
     }
     workers.forEach(worker => {
-      worker.postMessage({ type: 'Dispose' })
       worker.terminate()
     })
     workers = []
@@ -57,6 +144,7 @@ export default function WebMiner () {
 
   const mine = async () => {
     console.log('isMining', isMining)
+    if (!isMining) return
     if (!wallet.publicKey) return
 
     if (minerWs) {
@@ -123,11 +211,15 @@ export default function WebMiner () {
         }
       } else {
         console.log('Received non-Blob message:', event.data)
+        setServerMessage([event.data])
       }
     }
 
     ws.onerror = (error) => {
       console.error('WebSocket error:', error)
+      if (isMining) {
+        mine() // Reconnect if still mining
+      }
     }
 
     ws.onclose = (evt) => {
@@ -142,7 +234,15 @@ export default function WebMiner () {
     }
   }
 
-  const handleServerMessage = (message: ServerMessage) => {
+  const setupUserTotals = async () => {
+    if (!wallet.publicKey) return
+    const rewards = await getMinerRewardsNumeric(wallet.publicKey.toString())
+    setCoalTotal(rewards.coal)
+    setOreTotal(rewards.ore)
+    setChromiumTotal(rewards.chromium)
+  }
+
+  const handleServerMessage = async (message: ServerMessage) => {
     switch (message.type) {
       case 'StartMining':
         console.log('Received StartMining message:')
@@ -156,7 +256,10 @@ export default function WebMiner () {
         console.log('Difficulty:', message.data.difficulty)
         console.log('Best Nonce:', message.data.bestNonce)
         console.log('Active Miners:', message.data.activeMiners)
-        // You can update state or perform other actions based on this data
+        setServerMessage([`Active Miners: ${message.data.activeMiners}`, `Pool Difficulty: ${message.data.difficulty}`])
+        setOreLastSubmission(message.data.oreDetails.rewardDetails.minerEarnedRewards)
+        setCoalLastSubmission(message.data.coalDetails.rewardDetails.minerEarnedRewards)
+        setupUserTotals()
         break
     }
   }
@@ -231,11 +334,11 @@ export default function WebMiner () {
       setServerMessage(null);*/
 
       // Terminate all workers
-      workers.forEach(worker => {
+      /*workers.forEach(worker => {
         worker.postMessage({ type: 'Dispose' })
         worker.terminate()
       })
-      workers = []
+      workers = []*/
 
     } catch (error) {
       console.error('Failed to send Reset message:', error)
@@ -243,6 +346,27 @@ export default function WebMiner () {
   }
 
   const finishMining = async () => {
+    const _lastSubmissionTime = Date.now()
+    setTimeFromLastSubmission(0)
+    setLastSubmissionTime(_lastSubmissionTime)
+
+    const miningTme = (_lastSubmissionTime - miningStartedTime) / 1000
+
+    console.log('totalHashes', totalHashes, miningTme)
+
+    if (miningTme > 0) {
+      setHashRate(Math.round(totalHashes / miningTme))
+    } else {
+      setHashRate(0)
+    }
+
+    setViewTotalHashes(totalHashes)
+    setViewBestDifficulty(bestDifficulty)
+
+    totalHashes = 0
+    bestDifficulty = 0
+
+    console.log('finish mining')
     // Reset the mining system (you might need to implement this separately)
     await resetMiningSystem()
     // Sleep for a buffer time (commented out in the Rust code)
@@ -252,10 +376,7 @@ export default function WebMiner () {
     const now = Math.floor(Date.now() / 1000)
     const msg = new Uint8Array(new BigUint64Array([BigInt(now)]).buffer)
 
-    if (!wallet.signMessage) {
-      console.error('Wallet doesn\'t support message signing')
-      return
-    }
+    setupWorkers()
 
     try {
 
@@ -284,35 +405,32 @@ export default function WebMiner () {
     console.log('nonceRange:', nonceRangeStart, ' - ', nonceRangeEnd)
     console.log('cutoff:', cutoff)
 
-    let bestMiningResult: MiningResult | undefined = undefined
-
-    const miningStartedTime = Date.now()
-    let totalHashes = 0
-    let bestDifficulty = 0
-    let workerDone = 0
-
-    setMiningStartedTime(miningStartedTime)
+    workerDone = 0
+    bestMiningResult = null
+    miningStartedTime = Date.now()
+    setViewMiningStartedTime(miningStartedTime)
+    // setMiningTime(0)
+    // setCutoffTime(cutoff)
     // setTotalHashes(totalHashes)
     // setBestDifficulty(bestDifficulty)
 
     // handle mining loop
     console.log('mining loop')
 
-    for (const worker of workers) {
+    /*for (const worker of workers) {
       worker.postMessage({ type: 'Dispose' })
       worker.terminate()
-    }
+    }*/
 
-    const numberOfWorkers = navigator.hardwareConcurrency
-    workers = []
+    // workers = []
     const noncesPerWorker = Math.ceil((Number(nonceRangeEnd) - Number(nonceRangeStart)) / numberOfWorkers)
 
-    for (let i = 0; i < numberOfWorkers; i++) {
-      const worker = new Worker('/worker/miningWorker.js', { name: 'miner_' + i })
+    for (let i = 0; i < workers.length; i++) {
+      console.log('workers[i]', workers[i])
       const workerNonceStart = BigInt(Number(nonceRangeStart) + i * noncesPerWorker)
       const workerNonceEnd = BigInt(Math.min(Number(workerNonceStart) + noncesPerWorker - 1, Number(nonceRangeEnd)))
 
-      worker.postMessage({
+      workers[i].postMessage({
         type: 'StartMining',
         challenge,
         nonceStart: workerNonceStart,
@@ -320,65 +438,159 @@ export default function WebMiner () {
         cutoff
       })
 
-      worker.onmessage = async (e: MessageEvent<MiningResult>) => {
-
-        totalHashes += Number(e.data.total_hashes)
-
-        setTotalHashes(totalHashes)
-
-        if (e.data.best_difficulty > bestDifficulty) {
-          bestDifficulty = e.data.best_difficulty
-          setBestDifficulty(bestDifficulty)
-        }
-
-        const lastSubmissionTime = Date.now()
-
-        setLastSubmissionTime(lastSubmissionTime)
-
-        const miningTme = (lastSubmissionTime - miningStartedTime) / 1000
-
-        setMiningTme(miningTme)
-
-        if (miningTme > 0) {
-          setHashRate(Math.round(totalHashes / miningTme))
-        } else {
-          setHashRate(0)
-        }
-
-        console.log('e.data', e.data)
-
-        if (!bestMiningResult || e.data.best_difficulty > bestMiningResult.best_difficulty) {
-          bestMiningResult = e.data
-        }
-
-        workerDone++
-        if (workerDone >= numberOfWorkers) {
-          console.log('bestMiningResult', bestMiningResult)
-
-          if (bestMiningResult) {
-            await sendSubmission(bestMiningResult)
-          }
-          finishMining()
-        }
-      }
-
-      workers.push(worker)
     }
 
   }
 
   return (
-    <div>
-      <h1>Web Miner</h1>
-      <button onClick={isMining ? stopMining : startMining}>
-        {isMining ? 'Stop Mining' : 'Start Mining'}
-      </button>
-      <p>Mined for: {miningTme} s</p>
-      <p>Hash Rate: {hashRate} H/s</p>
-      <p>Total Hashes: {totalHashes}</p>
-      <p>Best Difficulty: {bestDifficulty}</p>
-      <p>Last Submission: {lastSubmissionTime ? new Date(lastSubmissionTime).toLocaleString() : 'N/A'}</p>
-      <p>Mine started at: {miningStartedTime ? new Date(miningStartedTime).toLocaleString() : 'N/A'}</p>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-4xl font-bold mb-8 text-center">Web Miner</h1>
+      <div className="text-center mb-6">
+        <p className="text-lg leading-relaxed">
+          Just connect a wallet and start to mine with the pool!
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Mining Control</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center items-center mb-4">
+              {viewIsMining ? (
+                <div className="relative w-16 h-16 mining-animation">
+                  <img
+                    src="/images/excalivator-logo-small-no-bg.png"
+                    alt="Mining Animation"
+                    className="object-contain"
+                  />
+                </div>
+              ) : (
+                <div className="w-16 h-16">
+                  <img
+                    src="/images/excalivator-logo-small-no-bg.png"
+                    alt="Mining Logo"
+                    className="object-contain"
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-center space-x-4">
+              <Button onClick={startMining} disabled={viewIsMining || !wallet.publicKey}>
+                Start Mining
+              </Button>
+              <Button onClick={stopMining} disabled={!viewIsMining}>
+                Stop Mining
+              </Button>
+            </div>
+            <div className="flex justify-center items-center space-x-2 mt-4">
+              <label htmlFor="threadCount" className="text-sm font-medium">
+                Threads:
+              </label>
+              <input
+                id="threadCount"
+                type="number"
+                min="1"
+                max={maxThread}
+                value={threadCount}
+                disabled={isMining}
+                onChange={(e) => setThreadCount(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-16 px-2 py-1 text-sm border rounded"
+              />
+            </div>
+            <div className="flex justify-center mt-4">
+              <p>Last mining started
+                at {viewMiningStartedTime ? new Date(viewMiningStartedTime).toLocaleString() : 'N/A'}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Mining Stats</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <p><strong>Status:</strong> {viewIsMining ? 'Mining' : 'Idle'}</p>
+              <p><strong>Hash Rate:</strong> {hashRate.toLocaleString()} H/s</p>
+              <p><strong>Total Hashes:</strong> {viewTotalHashes.toLocaleString()}</p>
+              <p><strong>Best Difficulty:</strong> {viewBestDifficulty}</p>
+              <p><strong>Total COAL:</strong> {coalTotal.toFixed(COAL_TOKEN_DECIMALS)}</p>
+              <p><strong>Total ORE:</strong> {oreTotal.toFixed(COAL_TOKEN_DECIMALS)}</p>
+              <p><strong>Total CHROMIUM:</strong> {chromiumTotal.toFixed(COAL_TOKEN_DECIMALS)}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Last Submission</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{lastSubmissionTime || 'No submission yet'}</p>
+            {timeFromLastSubmission > 0 && (
+              <div className="flex flex-col">
+                <p className="mt-2">
+                  <strong>Time since last submission:</strong>{' '}
+                  {timeFromLastSubmission}s ago
+                </p>
+                <p className="mt-2">
+                  <strong>COAL:</strong>{' '}
+                  {coalLastSubmission.toFixed(COAL_TOKEN_DECIMALS)}
+                </p>
+                <p className="mt-2">
+                  <strong>ORE:</strong>{' '}
+                  {oreLastSubmission.toFixed(COAL_TOKEN_DECIMALS)}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Server Message</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>{serverMessage.length > 0 ? serverMessage.join('\n') : 'No messages from server'}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Info</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="list-disc list-inside">
+            <li><strong>0 transactions fees</strong> are required to mine</li>
+            <li>The web miner <strong>is not</strong> the most optimized way to mine the pool</li>
+            <li>To get the best results check out the <Link href="/getting-started/quick-start"
+                                                            target="_blank"
+                                                            className="underline text-blue-500 hover:text-blue-700">
+              CLI Installation guide
+            </Link> or the <Link href="/getting-started/advanced-mining"
+                                 target="_blank"
+                                 className="underline text-blue-500 hover:text-blue-700">
+              Orion Client Installation guide
+            </Link></li>
+            <li>The browser may throttled this page if left in the background</li>
+          </ul>
+        </CardContent>
+      </Card>
+
+      {/*<Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Mining Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Progress value={(miningTime * cutoffTime) / 100} className="w-full"/>
+          <p className="text-center mt-2">
+            {miningTime % 60}s
+          </p>
+        </CardContent>
+      </Card>*/}
     </div>
   )
 }

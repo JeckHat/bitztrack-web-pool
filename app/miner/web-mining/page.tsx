@@ -47,8 +47,8 @@ export default function WebMiner () {
 
   useEffect(() => {
     // console.log('hardwareConcurrency', window.navigator.hardwareConcurrency)
-    setMaxThread(window.navigator.hardwareConcurrency)
-    setThreadCount(window.navigator.hardwareConcurrency)
+    setMaxThread(window.navigator.hardwareConcurrency - 1)
+    setThreadCount(window.navigator.hardwareConcurrency - 1)
   }, [])
 
   useEffect(() => {
@@ -528,7 +528,7 @@ export default function WebMiner () {
             <CardTitle>Last Submission</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>{lastSubmissionTime || 'No submission yet'}</p>
+            <p>{lastSubmissionTime ? (new Date(lastSubmissionTime)).toLocaleString() : 'No submission yet'}</p>
             {timeFromLastSubmission > 0 && (
               <div className="flex flex-col">
                 <p className="mt-2">
@@ -564,6 +564,7 @@ export default function WebMiner () {
         </CardHeader>
         <CardContent>
           <ul className="list-disc list-inside">
+            <li>The maximum amount of usable cores is the total one minus one</li>
             <li><strong>0 transactions fees</strong> are required to mine</li>
             <li>The web miner <strong>is not</strong> the most optimized way to mine the pool</li>
             <li>To get the best results check out the <Link href="/getting-started/quick-start"

@@ -7,48 +7,37 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { COAL_MINT_ADDRESS, COAL_SOL_LP_MINT_ADDRESS, COAL_TOKEN_DECIMALS } from '../../../lib/constants'
+import { COAL_MINT_ADDRESS, COAL_TOKEN_DECIMALS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { useToast } from '../../../hooks/use-toast'
-import { getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
-import { stakeToGuild } from '../../../lib/stakeToGuild'
+import { getMinerRewards, getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
 import { RefreshCw } from 'lucide-react'
-import Link from 'next/link'
-import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
+import { MinerBalanceString, StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
+import { claimRewards, MINIMUM_CLAIM_AMOUNT_COAL, MINIMUM_CLAIM_AMOUNT_ORE } from '../../../lib/claimRewards'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function StakingPage () {
+  const { toast } = useToast()
+
   const [amountCoal, setAmountCoal] = useState('')
   const [balanceCoal, setBalanceCoal] = useState(0)
   const [errorCoal, setErrorCoal] = useState('')
-  const [amountLP, setAmountLP] = useState('')
-  const [balanceLP, setBalanceLP] = useState(0)
-  const [errorLP, setErrorLP] = useState('')
   const wallet = useWallet()
   const [isStaking, setIsStaking] = useState(false)
-  const { toast } = useToast()
+  const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
+  const [selectedTab, setSelectedTab] = useState('miner')
+  const [isClaiming, setIsClaiming] = useState(false)
+  const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
 
   useEffect(() => {
-    const storedLastRefreshTime = localStorage.getItem('lastRefreshTime')
-    if (storedLastRefreshTime) {
-      const lastRefreshTime = parseInt(storedLastRefreshTime, 10)
-      setLastRefreshTime(lastRefreshTime)
-      const elapsed = Date.now() - lastRefreshTime
-      if (elapsed < COOLDOWN_DURATION) {
-        setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
-      } else {
-        // Only fetch if the cooldown has expired
-        fetchData()
-      }
-    } else {
-      // If there's no stored refresh time, it's the first fetch
-      fetchData()
+    const storedLastFetchTime = localStorage.getItem('lastRefreshTimeManagementRewards')
+    if (storedLastFetchTime) {
+      setLastRefreshTime(parseInt(storedLastFetchTime, 10))
     }
-  }, [wallet.publicKey])
+  }, [])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -73,15 +62,15 @@ export default function StakingPage () {
   }, [wallet.publicKey])
 
   const getData = async () => {
-    const [userBalanceCoal, userBalanceLP, poolStakeData] = await Promise.all([
+    const [userBalanceCoal, poolStakeData, minerRewards] = await Promise.all([
       (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS) : 0),
-      (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS) : 0),
-      getPoolStakeAndMultipliers()
+      getPoolStakeAndMultipliers(),
+      (wallet.publicKey ? getMinerRewards(wallet.publicKey.toString()) : { coal: '0', ore: '0', chromium: '0' }),
     ])
 
     setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))
-    setBalanceLP(parseFloat(userBalanceLP.toFixed(COAL_TOKEN_DECIMALS)))
     setPoolStakeAndMultipliers(poolStakeData)
+    setMinerRewards(minerRewards)
   }
 
   const fetchData = async () => {
@@ -100,8 +89,7 @@ export default function StakingPage () {
 
       const now = Date.now()
       setLastRefreshTime(now)
-      localStorage.setItem('lastRefreshTime', now.toString())
-      setCooldownRemaining(COOLDOWN_DURATION / 1000) // Set cooldown to full duration
+      localStorage.setItem('lastRefreshTimeManagementRewards', now.toString())
 
       toast({
         title: 'Data Fetched',
@@ -125,17 +113,6 @@ export default function StakingPage () {
       setErrorCoal('Insufficient balance')
     } else {
       setErrorCoal('')
-    }
-  }
-
-  const handleAmountChangeLP = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setAmountLP(value)
-
-    if (parseFloat(value) > balanceLP) {
-      setErrorLP('Insufficient balance')
-    } else {
-      setErrorLP('')
     }
   }
 
@@ -166,67 +143,90 @@ export default function StakingPage () {
     }
   }
 
-  const handleStakeLP = async () => {
+// Add this function to check if rewards meet the minimum requirements
+  const meetsMinimumRequirements = () => {
+    if (!minerRewards) return false
+    const coalRewards = parseFloat(minerRewards.coal)
+    const oreRewards = parseFloat(minerRewards.ore)
+    return coalRewards >= MINIMUM_CLAIM_AMOUNT_COAL || oreRewards >= MINIMUM_CLAIM_AMOUNT_ORE
+  }
+
+  const handleClaimMiningRewards = async () => {
     if (!wallet.connected || !wallet.publicKey) {
       toast({ title: 'Wallet Error', description: 'Please connect your wallet first', variant: 'destructive' })
       return
     }
 
-    if (parseFloat(amountLP) > balanceLP) {
-      toast({ title: 'Balance Error', description: 'Insufficient balance, use a valid amount', variant: 'destructive' })
+    if (!meetsMinimumRequirements()) {
+      toast({
+        title: 'Insufficient Rewards',
+        description: `You need at least ${MINIMUM_CLAIM_AMOUNT_COAL} COAL or ${MINIMUM_CLAIM_AMOUNT_ORE} ORE to claim rewards.`,
+        variant: 'destructive',
+      })
       return
     }
 
-    setIsStaking(true) // Start the loading state
+    setIsClaiming(true) // Start the loading state
 
     try {
-      await stakeToGuild(parseFloat(amountLP), wallet)
-      //wait for 2 seconds
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-      toast({ title: 'Staking successful', description: 'Stake successfully added to the guild!', variant: 'default' })
-      const newBalance = await getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS)
-      setBalanceLP(newBalance)
-      setAmountLP('')
+      await claimRewards(wallet)
+      toast({ title: 'Claim successful', description: 'Successfully queued claim rewards!', variant: 'default' })
     } catch (error) {
-      console.error('Staking failed:', error)
-      toast({ title: 'Staking failed', description: (error as string).toString(), variant: 'destructive' })
+      console.error('Claim failed:', error)
+      toast({ title: 'Claim failed', description: (error as string).toString(), variant: 'destructive' })
     } finally {
-      setIsStaking(false) // End the loading state
+      setIsClaiming(false) // End the loading state
+    }
+  }
+
+  const renderTitleAndSubtitle = () => {
+    switch (selectedTab) {
+      case 'miner':
+        return (
+          <>
+            <h1 className="text-4xl font-bold text-center mb-8">Miner Rewards</h1>
+            <div className="text-center mb-6">
+              <p className="text-lg leading-relaxed">
+                Manage your miner rewards and boost your earnings.
+              </p>
+            </div>
+          </>
+        )
+      case 'pool':
+      default:
+        return (
+          <>
+            <h1 className="text-4xl font-bold text-center mb-8">COAL Staking</h1>
+            <div className="text-center mb-6">
+              <p className="text-lg leading-relaxed">
+                Obtain the best rewards with the Pool staking system.
+              </p>
+            </div>
+          </>
+        )
     }
   }
 
   return (
     <div className="max-w-4xl w-[min(56rem,100vw)]  mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold text-center mb-8">COAL Staking</h1>
-      <div className="text-center mb-6">
-        <p className="text-lg leading-relaxed">
-          Obtain the best rewards with the Pool staking system.
-        </p>
-      </div>
+      {renderTitleAndSubtitle()}
 
-      <Tabs defaultValue="guild" className="w-full">
+      <Tabs defaultValue="miner" className="w-full" onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="guild">Guild</TabsTrigger>
-          <TabsTrigger value="pool">Pool</TabsTrigger>
+          <TabsTrigger value="miner">Miner Rewards</TabsTrigger>
+          <TabsTrigger value="pool">Pool Stake</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="guild">
+        <TabsContent value="miner">
           <Card>
             <CardHeader>
               <CardTitle>
                 <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span>
-                    Stake to the Guild
-                    </span>
-                    <span>
-                    Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? '-'}x - Total
-                    Stake: {poolStakeAndMultipliers?.guild_stake ?? '-'} COAL-SOL
-                    </span>
-                  </div>
+                  Mining Rewards
                   <Button
                     onClick={fetchData}
                     disabled={cooldownRemaining > 0}
+                    size="lg"
                     className="relative"
                   >
                     <RefreshCw className="mr-2 h-4 w-4"/>
@@ -246,57 +246,52 @@ export default function StakingPage () {
             </CardHeader>
             <CardContent>
               <div className="bg-muted p-4 rounded-md mb-6">
-                <h3 className="text-lg font-semibold mb-2">Benefits of Staking LP to the Guild</h3>
                 <ul className="list-disc list-inside mb-2">
-                  <li><strong>0 transactions fees</strong> are required to stake, they are payed by the pool.</li>
-                  <li>A small fee to create the guild personal account may be added <strong>the first time</strong> from
-                    Solana.
+                  <li><strong>0 transactions fees</strong> are required to claim rewards, they are payed by the pool.
                   </li>
-                  <li>Adds a multiplier for <strong>every COAL we mine</strong>, benefiting all miners.</li>
-                  <li>Creates <strong>passive returns</strong> for LP stakers from a portion of mining earnings.</li>
-                  <li>Staking is <strong>not required</strong> to get the bonus, but provides additional passive
-                    rewards.
+                  <li>Unclaimed <strong>COAL</strong> and <strong>ORE</strong> rewards are automatically added to the
+                    pool stake
+                  </li>
+                  <li><strong>COAL</strong> and <strong>ORE</strong> rewards are earned every minute while you&#39;re
+                    actively mining in the pool. These rewards are distributed when a mining transaction is submitted.
+                  </li>
+                  <li><strong>CHROMIUM</strong> is earned each time the pool reprocesses COAL, provided you&#39;ve been
+                    active in the pool during the previous days.
                   </li>
                 </ul>
-                <p className="mt-4">
-                  You can obtain COAL-SOL LP tokens from <strong>Meteora</strong>.
-                  <Link href="https://app.meteora.ag/pools/F6LXJ8CptcmrofbszVHBRsBvVTX2rNWwFbjCARZukzNS"
-                        target="_blank"
-                        className="underline text-blue-500 hover:text-blue-700 ml-2">
-                    Get COAL-SOL LP here
-                  </Link>
+              </div>
+              <p>COAL: {minerRewards?.coal ?? '0'}</p>
+              <p>ORE: {minerRewards?.ore ?? '0'}</p>
+              <p>CHROMIUM: {minerRewards?.chromium ?? '0'}</p>
+              {!meetsMinimumRequirements() && (
+                <p className="text-red-500 mt-2">
+                  Minimum withdrawal: {MINIMUM_CLAIM_AMOUNT_COAL} COAL or {MINIMUM_CLAIM_AMOUNT_ORE} ORE. Your current
+                  rewards do not meet this minimum.
                 </p>
-              </div>
-              <div className="mt-4">
-                <Label htmlFor="balanceLP">Available Balance:</Label>
-                <p id="balanceLP" className="text-lg font-semibold">{balanceLP} COAL-SOL LP</p>
-              </div>
-              <div>
-                <Label htmlFor="amount">Amount to Stake:</Label>
-                <Input
-                  id="amount"
-                  type="number"
-                  value={amountLP}
-                  onChange={handleAmountChangeLP}
-                  placeholder="Enter amount to stake"
-                />
-                {errorLP && <p className="text-destructive text-sm mt-1">{errorLP}</p>}
-              </div>
+              )}
+              {meetsMinimumRequirements() && (
+                <div>
+                  <p className="text-red-500 mt-2">
+                    Please note: It may take a few minutes for your claimed rewards to appear in your wallet.
+                  </p>
+                  <p className="text-red-500">
+                    If you don&#39;t see your funds after 5-10 minutes, please try claiming again.
+                  </p>
+                </div>
+              )}
             </CardContent>
             <CardFooter>
               <Button
                 size="lg"
-                className="relative"
-                onClick={handleStakeLP}
-                disabled={!wallet.connected || isNaN(parseFloat(amountLP)) || parseFloat(amountLP) > balanceLP || parseFloat(amountLP) <= 0 || isStaking}
-              >
-                {isStaking && (
+                className="relative" onClick={handleClaimMiningRewards}
+                disabled={!meetsMinimumRequirements() || isClaiming}>
+                {isClaiming && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
                   </div>
                 )}
-                <span className={isStaking ? 'opacity-0' : ''}>
-                    <strong>STAKE</strong>
+                <span className={isClaiming ? 'opacity-0' : ''}>
+                    <strong>CLAIM ALL MINING REWARDS</strong>
                   </span>
               </Button>
             </CardFooter>

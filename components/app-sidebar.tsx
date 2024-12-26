@@ -94,12 +94,12 @@ const data: MenuData[] = [
         url: '/miner/balance-stats',
       },
       {
-        title: 'Claim rewards',
-        url: '/miner/claim-rewards',
+        title: 'Miner management/rewards',
+        url: '/miner/management-rewards',
       },
       {
-        title: 'Stake COAL',
-        url: '/miner/stake-coal',
+        title: 'Guild management/rewards',
+        url: '/miner/guild-management-rewards',
       },
       {
         title: 'Web mining',

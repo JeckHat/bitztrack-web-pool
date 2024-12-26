@@ -13,9 +13,9 @@ export default function Page () {
       </div>
       <ul className="list-disc pl-5 space-y-4">
         <li>
-          <strong>Web miner:</strong> We are developing a web-based miner that will allow users to connect their wallets
-          and mine directly from their browsers, anywhere and anytime. This feature aims to make mining more accessible
-          and convenient for everyone.
+          <strong>Miner incentives:</strong> An upcoming feature will provide an ORE boost, enhancing the mining rewards
+          with a
+          multiplier. This will encourage more participation and reward active contributors.
         </li>
         <li>
           <strong>Passive income rewards for LP stakers:</strong> We plan to introduce a system where liquidity
@@ -31,11 +31,6 @@ export default function Page () {
           <strong>Website miner stats section:</strong> Miners will have access to detailed statistics about their
           mining activities, including hash rates, earnings, and more. This transparency will allow miners to optimize
           their operations.
-        </li>
-        <li>
-          <strong>Website Miner claim rewards:</strong> We are working on a streamlined process for miners to claim
-          their rewards directly from the website. This will simplify the reward distribution process and ensure timely
-          payouts.
         </li>
         <li>
           <strong>ORE boost:</strong> An upcoming feature will provide an ORE boost, enhancing the mining rewards with a

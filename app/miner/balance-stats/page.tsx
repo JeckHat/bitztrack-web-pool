@@ -9,6 +9,7 @@ import { getLastMinerSubmission, getMinerRewards, getPoolChromiumReprocessingInf
 import { ChromiumReprocessInfoWithDate, MinerBalanceString, SubmissionWithDate } from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import { useSearchParams } from 'next/navigation'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -22,6 +23,7 @@ export default function Page () {
   const { toast } = useToast()
   const [suggestions, setSuggestions] = useState<{ value: string; label: string }[]>([])
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     try {
@@ -30,6 +32,13 @@ export default function Page () {
     } catch (error) {
       console.error('Error parsing stored addresses:', error)
       setSuggestions([])
+    }
+
+    // Check for 'key' query parameter
+    const keyParam = searchParams?.get('key')
+    if (keyParam) {
+      setPublicKey(keyParam)
+      fetchData(keyParam)
     }
   }, [])
 
@@ -68,8 +77,9 @@ export default function Page () {
     return () => clearInterval(timer)
   }, [lastFetchTime])
 
-  const fetchData = async () => {
-    if (!publicKey) {
+  const fetchData = async (key?: string) => {
+    const publicKeyToUse = key || publicKey
+    if (!publicKeyToUse) {
       toast({
         title: 'Error',
         description: 'Please enter a public key',
@@ -89,8 +99,8 @@ export default function Page () {
 
     try {
       const [rewards, submission, chromium] = await Promise.all([
-        getMinerRewards(publicKey),
-        getLastMinerSubmission(publicKey),
+        getMinerRewards(publicKeyToUse),
+        getLastMinerSubmission(publicKeyToUse),
         getPoolChromiumReprocessingInfo(),
       ])
 
@@ -102,7 +112,7 @@ export default function Page () {
       setLastFetchTime(now)
       localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
 
-      updateRecentAddresses(publicKey)
+      updateRecentAddresses(publicKeyToUse)
 
       toast({
         title: 'Data Fetched',
@@ -136,7 +146,7 @@ export default function Page () {
             <div
               onMouseEnter={() => setIsPopoverOpen(true)}
               onMouseLeave={() => setIsPopoverOpen(false)}>
-              <Button onClick={fetchData} disabled={cooldownRemaining > 0}>
+              <Button onClick={() => fetchData()} disabled={cooldownRemaining > 0}>
                 <RefreshCw className="mr-2 h-4 w-4"/> Fetch Data
               </Button>
             </div>

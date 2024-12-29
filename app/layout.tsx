@@ -10,6 +10,7 @@ import { ClientWalletProvider } from '../components/client-wallet-provider'
 import dynamic from 'next/dynamic'
 
 import { Toaster } from '@/components/ui/toaster'
+import { Suspense } from 'react'
 
 const ClientSideHeaderSection = dynamic(() => import('../components/client-side-header-section').then(mod => mod.ClientSideHeaderSection), { ssr: false })
 
@@ -57,7 +58,7 @@ export default function RootLayout ({
                 <NavigationBreadcrumbs/>
                 <ClientSideHeaderSection/>
               </header>
-              {children}
+              <Suspense>{children}</Suspense>
             </SidebarInset>
           </SidebarProvider>
         </ClientWalletProvider>

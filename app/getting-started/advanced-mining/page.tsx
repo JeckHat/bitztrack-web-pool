@@ -44,7 +44,7 @@ export default function Page () {
             <ul className="list-disc list-inside">
               <li>Create a new keypair or use the <strong>Search</strong> function to load an existing one.</li>
               <li>Set the optimal algorithm for both CPU and GPU based on your benchmark results.</li>
-              <li>Select <strong>Coal Pool</strong> as your mining pool.</li>
+              <li>Select <strong>Excalivator</strong> as your mining pool.</li>
             </ul>
           </CardFooter>
         </Card>

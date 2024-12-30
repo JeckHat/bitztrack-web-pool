@@ -106,7 +106,7 @@ export default function Page () {
           </CardContent>
           <CardFooter>
             <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
-               <code>cargo install coal-pool-client</code>
+               <code>cargo install excalivator-client</code>
             </pre>
           </CardFooter>
         </Card>
@@ -120,7 +120,7 @@ export default function Page () {
           </CardContent>
           <CardFooter>
             <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto w-full">
-               <code>coal-pool-client</code>
+               <code>excalivator-client</code>
             </pre>
           </CardFooter>
         </Card>
@@ -129,7 +129,8 @@ export default function Page () {
         <Card className="px-6 py-4">
           <CardTitle><h2 className="text-2xl font-semibold mb-4">4. Create Your Wallet</h2></CardTitle>
           <CardContent>
-            <p>When you launch the <code>coal-pool-client</code> command, you’ll be prompted to create a wallet. Choose
+            <p>When you launch the <code>excalivator-client</code> command, you’ll be prompted to create a wallet.
+              Choose
               the <strong>&#34;Generate Keypair&#34;</strong> option to generate your wallet keypair.</p>
           </CardContent>
         </Card>

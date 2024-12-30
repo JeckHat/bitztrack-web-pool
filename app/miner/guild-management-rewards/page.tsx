@@ -280,7 +280,7 @@ export default function Page () {
                 </ul>
               </div>
               <p className="text-yellow-500 font-semibold">
-                Important: The Coal Pool is currently working on implementing direct incentive rewards for LP token
+                Important: Excalivator is currently working on implementing direct incentive rewards for LP token
                 staking. This feature will be available soon.
               </p>
               {/* Uncomment and update these lines when the feature is implemented

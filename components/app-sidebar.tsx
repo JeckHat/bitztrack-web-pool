@@ -51,6 +51,10 @@ const data: MenuData[] = [
         url: '/getting-started/advanced-mining',
       },
       {
+        title: 'HiveOS mining',
+        url: '/getting-started/hiveos-mining',
+      },
+      {
         title: 'Mobile mining',
         url: '/getting-started/mobile-mining',
       },

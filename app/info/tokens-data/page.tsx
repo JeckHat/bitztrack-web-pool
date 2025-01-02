@@ -12,11 +12,17 @@ export default function Page () {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex flex-col gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>COAL</CardTitle>
-            First and only PoW meme coin on Solana
+            <CardTitle>
+              <a href="https://minechain.gg"
+                 target="_blank"
+                 className="underline"
+                 rel="noopener noreferrer">COAL</a>
+            </CardTitle>
+            First and only PoW meme coin on Solana<br/>
+            Fair distribution, gamified mechanics, mine, craft, forge tools and grow you yield with your guild.
           </CardHeader>
           <CardContent>
             <TokenPrice
@@ -29,8 +35,12 @@ export default function Page () {
 
         <Card>
           <CardHeader>
-            <CardTitle>ORE</CardTitle>
-            Digital gold on Solana
+            <CardTitle> <a href="https://ore.supply"
+                           target="_blank"
+                           className="underline"
+                           rel="noopener noreferrer">ORE</a></CardTitle>
+            Digital gold on Solana<br/>
+            Hard, liquid, secure and easy to mine. Liquidity for onchain commodities. Max supply 5 million tokens.
           </CardHeader>
           <CardContent>
             <TokenPrice

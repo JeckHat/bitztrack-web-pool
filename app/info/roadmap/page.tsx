@@ -18,11 +18,6 @@ export default function Page () {
           multiplier. This will encourage more participation and reward active contributors.
         </li>
         <li>
-          <strong>Passive income rewards for LP stakers:</strong> We plan to introduce a system where liquidity
-          providers (LP) can earn passive income by staking with the guild. This will provide an additional incentive
-          for users to participate in the ecosystem.
-        </li>
-        <li>
           <strong>Website Pool stats section:</strong> A dedicated section on the website will display comprehensive
           statistics about the pool, including performance metrics and historical data. This will help users make
           informed decisions based on real-time data.

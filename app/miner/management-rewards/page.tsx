@@ -272,10 +272,13 @@ export default function StakingPage () {
               {meetsMinimumRequirements() && (
                 <div>
                   <p className="text-red-500 mt-2">
-                    Please note: It may take a few minutes for your claimed rewards to appear in your wallet.
+                    Please note: It may take up to 10 minutes for your claimed rewards to appear in your wallet as claim
+                    are done in batches.
                   </p>
-                  <p className="text-red-500">
-                    If you don&#39;t see your funds after 5-10 minutes, please try claiming again.
+                  <p className="text-red-500 mt-2">
+                    For each token account not present in your wallet a deduction from rewards of 4 COAL or 0.02 ORE
+                    (depending on
+                    what you have available) will be applied.
                   </p>
                 </div>
               )}
@@ -341,6 +344,8 @@ export default function StakingPage () {
                   <li>Helps the Pool to reach and maintain the maximum 2x multiplier to distributes more rewards.</li>
                   <li>Staking is <strong>not required</strong> to get the bonus but helps you and other miners to get
                     more COAL.
+                  </li>
+                  <li>Staking gets compounded <strong>automatically</strong> inside your miner rewards.
                   </li>
                 </ul>
               </div>

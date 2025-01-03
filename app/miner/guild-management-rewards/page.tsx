@@ -256,6 +256,10 @@ export default function Page () {
                     Rewards are distributed automatically every few hours based on your staked amount.
                   </li>
                   <li>
+                    Rewards from Excalivator Pool are <strong>automatically</strong> compounded in the pool stake and
+                    your miner rewards
+                  </li>
+                  <li>
                     You don&#39;t need to actively mine to earn these rewards - they accumulate as long as your LP
                     tokens
                     are staked.
@@ -265,7 +269,7 @@ export default function Page () {
                     allowing
                     you to earn
                     additional
-                    LP rewards.
+                    LP rewards from <strong>both pools</strong>.
                   </li>
                   <li>
                     Visit the <a
@@ -280,14 +284,14 @@ export default function Page () {
                 </ul>
               </div>
               <p className="text-yellow-500 font-semibold">
-                Important: Excalivator is currently working on implementing direct incentive rewards for LP token
-                staking. This feature will be available soon.
+                The rewards you see here are automatically compounded in your miner rewards balance.<br/>You can see the
+                total
+                balance in the <Link href="/miner/management-rewards"
+                                     className="underline text-blue-500 hover:text-blue-700">Management Page</Link>
               </p>
-              {/* Uncomment and update these lines when the feature is implemented
-      <p>LP Staked: {poolStakeAndMultipliers?.total_lp_staked || '0'}</p>
-      <p>Estimated Daily Return: {poolStakeAndMultipliers?.estimated_daily_return || '0'}</p>
-      <p>Claimable COAL: {poolStakeAndMultipliers?.claimable_coal || '0'}</p>
-      */}
+              <p>LP Staked: {lpBalance.staked || '0'}</p>
+              <p>Estimated Daily Return: {'0'}</p>
+              <p>Total COAL Rewards: {'0'}</p>
             </CardContent>
             <CardFooter>
               {/* Uncomment this button when the claim feature is implemented

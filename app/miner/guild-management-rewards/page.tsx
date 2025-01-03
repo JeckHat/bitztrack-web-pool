@@ -5,7 +5,13 @@ import { useWallet } from '@solana/wallet-adapter-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
-import { getLPStake, getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
+import {
+  getLPStake,
+  getMinerGuildStakeRewards,
+  getMinerGuildStakeRewards24h,
+  getPoolStakeAndMultipliers,
+  getTokenBalance
+} from '../../../lib/poolUtils'
 import { COAL_SOL_LP_MINT_ADDRESS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
@@ -21,6 +27,7 @@ const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 export default function Page () {
   const wallet = useWallet()
   const { toast } = useToast()
+  const [guildRewards, setGuildRewards] = useState({ guildRewards: '0', guildRewards24h: '0' })
   const [lpBalance, setLpBalance] = useState({ staked: 0, wallet: 0 })
   const [unstakeAmount, setUnstakeAmount] = useState('')
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
@@ -83,12 +90,15 @@ export default function Page () {
       }
 
       try {
-        const [lpWalletBalance, lpStakeBalance, poolStakeData] = await Promise.all([
+        const [lpWalletBalance, lpStakeBalance, poolStakeData, guildStakeRewards, guildStakeRewards24h] = await Promise.all([
           getTokenBalance(wallet.publicKey, COAL_SOL_LP_MINT_ADDRESS),
           getLPStake(wallet.publicKey),
-          getPoolStakeAndMultipliers()
+          getPoolStakeAndMultipliers(),
+          getMinerGuildStakeRewards(wallet.publicKey.toString()),
+          getMinerGuildStakeRewards24h(wallet.publicKey.toString()),
         ])
 
+        setGuildRewards({ guildRewards: guildStakeRewards, guildRewards24h: guildStakeRewards24h })
         setLpBalance({ wallet: lpWalletBalance, staked: lpStakeBalance })
         setPoolStakeAndMultipliers(poolStakeData)
 
@@ -290,8 +300,8 @@ export default function Page () {
                                      className="underline text-blue-500 hover:text-blue-700">Management Page</Link>
               </p>
               <p>LP Staked: {lpBalance.staked || '0'}</p>
-              <p>Estimated Daily Return: {'0'}</p>
-              <p>Total COAL Rewards: {'0'}</p>
+              <p>Estimated Daily Return: {guildRewards.guildRewards || '0'}</p>
+              <p>Total COAL Rewards: {guildRewards.guildRewards24h || '0'}</p>
             </CardContent>
             <CardFooter>
               {/* Uncomment this button when the claim feature is implemented

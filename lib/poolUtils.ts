@@ -133,6 +133,24 @@ export async function getMinerRewardsNumeric (publicKey: string): Promise<MinerB
   }
 }
 
+export async function getMinerGuildStakeRewards (publicKey: string): Promise<string> {
+  try {
+    const response = await axios.get<string>(`${POOL_SERVER}/guild/lp-staking-rewards?pubkey=${publicKey}`)
+    return response.data
+  } catch {
+    return '0'
+  }
+}
+
+export async function getMinerGuildStakeRewards24h (publicKey: string): Promise<string> {
+  try {
+    const response = await axios.get<string>(`${POOL_SERVER}/guild/lp-staking-rewards-24h?pubkey=${publicKey}`)
+    return response.data
+  } catch {
+    return '0'
+  }
+}
+
 export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
   const response = await getMinerRewardsNumeric(publicKey)
   return {

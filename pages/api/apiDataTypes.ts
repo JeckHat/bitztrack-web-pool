@@ -43,12 +43,30 @@ export type SubmissionWithDate = {
   created_at: Date,
 }
 
-export type ChromiumReprocessInfo = {
+export type ReprocessInfo = {
   last_reprocess: string,
   next_reprocess: string,
 }
 
-export type ChromiumReprocessInfoWithDate = {
+export type ReprocessInfoWithDate = {
   last_reprocess: Date,
   next_reprocess: Date,
+}
+
+export type FullMinerBalance = {
+  sol: number,
+  coal: number,
+  ore: number,
+  chromium: number,
+  ingot: number,
+  wood: number,
+}
+
+export type FullMinerBalanceString = {
+  sol: string,
+  coal: string,
+  ore: string,
+  chromium: string,
+  ingot: string,
+  wood: string,
 }

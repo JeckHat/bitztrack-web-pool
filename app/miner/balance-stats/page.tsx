@@ -5,8 +5,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { getLastMinerSubmission, getMinerRewards, getPoolChromiumReprocessingInfo } from '@/lib/poolUtils'
-import { ChromiumReprocessInfoWithDate, MinerBalanceString, SubmissionWithDate } from '@/pages/api/apiDataTypes'
+import {
+  getLastChromiumReprocessingEarning,
+  getLastDiamondHandsReprocessingEarning,
+  getLastMinerSubmission,
+  getMinerRewards,
+  getPoolChromiumReprocessingInfo,
+  getPoolDiamondHandsReprocessingInfo
+} from '@/lib/poolUtils'
+import {
+  FullMinerBalanceString,
+  MinerBalanceString,
+  ReprocessInfoWithDate,
+  SubmissionWithDate
+} from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import { useSearchParams } from 'next/navigation'
@@ -16,8 +28,11 @@ const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 export default function Page () {
   const [publicKey, setPublicKey] = useState('')
   const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
+  const [minerRewardsReprocessChromium, setMinerRewardsReprocessChromium] = useState<FullMinerBalanceString | null>(null)
+  const [minerRewardsDiamondHands, setMinerRewardsDiamondHands] = useState<FullMinerBalanceString | null>(null)
   const [lastSubmission, setLastSubmission] = useState<SubmissionWithDate | null>(null)
-  const [chromiumInfo, setChromiumInfo] = useState<ChromiumReprocessInfoWithDate | null>(null)
+  const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
+  const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const { toast } = useToast()
@@ -98,15 +113,21 @@ export default function Page () {
     }
 
     try {
-      const [rewards, submission, chromium] = await Promise.all([
+      const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning] = await Promise.all([
         getMinerRewards(publicKeyToUse),
         getLastMinerSubmission(publicKeyToUse),
         getPoolChromiumReprocessingInfo(),
+        getPoolDiamondHandsReprocessingInfo(),
+        getLastChromiumReprocessingEarning(publicKeyToUse),
+        getLastDiamondHandsReprocessingEarning(publicKeyToUse)
       ])
 
       setMinerRewards(rewards)
       setLastSubmission(submission)
-      setChromiumInfo(chromium)
+      setChromiumDatesInfo(chromiumInfo)
+      setDiamondHandsDatesInfo(diamondHandsInfo)
+      setMinerRewardsReprocessChromium(chromiumEarning)
+      setMinerRewardsDiamondHands(diamondHandsEarning)
 
       const now = Date.now()
       setLastFetchTime(now)
@@ -185,14 +206,28 @@ export default function Page () {
         </Card>
       )}
 
-      {chromiumInfo && (
+      {chromiumDatesInfo && (
         <Card>
           <CardHeader>
             <CardTitle>Chromium Reprocessing Info</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>Last Reprocess: {chromiumInfo.last_reprocess.toLocaleString()}</p>
-            <p>Next Reprocess: {chromiumInfo.next_reprocess.toLocaleString()}</p>
+            <p>Last Reprocess: {chromiumDatesInfo.last_reprocess.toLocaleString()}</p>
+            <p>Obtained: {minerRewardsReprocessChromium?.chromium ?? '-'} CHROMIUM</p>
+            <p>Next Reprocess: {chromiumDatesInfo.next_reprocess.toLocaleString()}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {diamondHandsDatesInfo && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Diamond Hands Info</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p>Last Reprocess: {diamondHandsDatesInfo.last_reprocess.toLocaleString()}</p>
+            <p>Obtained: {minerRewardsDiamondHands?.coal ?? '-'} COAL - {minerRewardsDiamondHands?.ore ?? '-'} ORE</p>
+            <p>Next Reprocess: {diamondHandsDatesInfo.next_reprocess.toLocaleString()}</p>
           </CardContent>
         </Card>
       )}

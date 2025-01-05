@@ -4,10 +4,12 @@ import axios from 'axios'
 import {
   BalanceData,
   BlockhashData,
-  ChromiumReprocessInfo,
-  ChromiumReprocessInfoWithDate,
+  FullMinerBalance,
+  FullMinerBalanceString,
   MinerBalance,
   MinerBalanceString,
+  ReprocessInfo,
+  ReprocessInfoWithDate,
   StakeAndMultipliers,
   StakeAndMultipliersString,
   Submission,
@@ -67,7 +69,6 @@ export async function getPoolAuthorityPubkey (): Promise<PublicKey> {
 export async function signUpMiner (publicKey: string): Promise<void> {
   const response = await axios.post(`${POOL_SERVER}/v2/signup?miner=${publicKey}`, 'BLANK')
   if (response.data === 'SUCCESS') {
-    console.log('Successfully signed up!')
   } else if (response.data !== 'EXISTS') {
     console.log('Signup transaction failed, please try again.')
   }
@@ -178,7 +179,6 @@ export async function getMinerSubmissions (publicKey: string): Promise<Submissio
 
 export async function getLastMinerSubmission (publicKey: string): Promise<SubmissionWithDate> {
   const submissions = await getMinerSubmissions(publicKey)
-  console.log('submissions', submissions)
   return submissions.length > 0 ? submissions[0] : {
     difficulty: 0,
     created_at: new Date(),
@@ -186,9 +186,9 @@ export async function getLastMinerSubmission (publicKey: string): Promise<Submis
   }
 }
 
-export async function getPoolChromiumReprocessingInfo (): Promise<ChromiumReprocessInfoWithDate> {
+export async function getPoolChromiumReprocessingInfo (): Promise<ReprocessInfoWithDate> {
   try {
-    const response = await axios.get<ChromiumReprocessInfo>(`${POOL_SERVER}/pool/chromium/reprocess-info`)
+    const response = await axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/chromium-info`)
     return {
       last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
       next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
@@ -197,6 +197,67 @@ export async function getPoolChromiumReprocessingInfo (): Promise<ChromiumReproc
     return {
       last_reprocess: new Date(),
       next_reprocess: new Date(),
+    }
+  }
+}
+
+export async function getPoolDiamondHandsReprocessingInfo (): Promise<ReprocessInfoWithDate> {
+  try {
+    const response = await axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/diamond-hands-info`)
+    return {
+      last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
+      next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
+    }
+  } catch {
+    return {
+      last_reprocess: new Date(),
+      next_reprocess: new Date(),
+    }
+  }
+}
+
+export async function getLastChromiumReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
+  try {
+    const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-chromium?pubkey=${publicKey}`)
+    return {
+      sol: response.data.sol?.toString() ?? '-',
+      coal: response.data.coal?.toString() ?? '-',
+      ore: response.data.ore?.toString() ?? '-',
+      chromium: response.data.chromium?.toString() ?? '-',
+      ingot: response.data.ingot?.toString() ?? '-',
+      wood: response.data.wood?.toString() ?? '-',
+    }
+  } catch {
+    return {
+      sol: '-',
+      coal: '-',
+      ore: '-',
+      chromium: '-',
+      ingot: '-',
+      wood: '-',
+    }
+  }
+}
+
+export async function getLastDiamondHandsReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
+  try {
+    const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
+    return {
+      sol: response.data.sol?.toString() ?? '-',
+      coal: response.data.coal?.toString() ?? '-',
+      ore: response.data.ore?.toString() ?? '-',
+      chromium: response.data.chromium?.toString() ?? '-',
+      ingot: response.data.ingot?.toString() ?? '-',
+      wood: response.data.wood?.toString() ?? '-',
+    }
+  } catch {
+    return {
+      sol: '-',
+      coal: '-',
+      ore: '-',
+      chromium: '-',
+      ingot: '-',
+      wood: '-',
     }
   }
 }

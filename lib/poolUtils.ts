@@ -4,6 +4,7 @@ import axios from 'axios'
 import {
   BalanceData,
   BlockhashData,
+  DiamondHandsMultiplier,
   FullMinerBalance,
   FullMinerBalanceString,
   MinerBalance,
@@ -68,8 +69,7 @@ export async function getPoolAuthorityPubkey (): Promise<PublicKey> {
 
 export async function signUpMiner (publicKey: string): Promise<void> {
   const response = await axios.post(`${POOL_SERVER}/v2/signup?miner=${publicKey}`, 'BLANK')
-  if (response.data === 'SUCCESS') {
-  } else if (response.data !== 'EXISTS') {
+  if (response.data !== 'EXISTS') {
     console.log('Signup transaction failed, please try again.')
   }
 }
@@ -183,6 +183,35 @@ export async function getLastMinerSubmission (publicKey: string): Promise<Submis
     difficulty: 0,
     created_at: new Date(),
     nonce: 0
+  }
+}
+
+export async function getMinerLastClaim (publicKey: string): Promise<Date | null> {
+  try {
+    const response = await axios.get<{ created_at: string }>(`${POOL_SERVER}/miner/last-claim?pubkey=${publicKey}`)
+    console.log('last claim:', response.data.created_at)
+    return parseISO(response.data.created_at + '.000Z')
+  } catch {
+    return null
+  }
+}
+
+export async function getDiamondHandsMultiplier (publicKey: string): Promise<DiamondHandsMultiplier> {
+  const lastClaim = await getMinerLastClaim(publicKey)
+  if (lastClaim === null) {
+    return {
+      lastClaim: null,
+      multiplier: 4,
+    }
+  } else {
+    // check how many weeks have passed from the last claim
+    const weeksPassed = Math.floor((new Date().getTime() - lastClaim.getTime()) / (7 * 24 * 60 * 60 * 1000))
+    // if 4 weeks have passed, return 4, otherwise return 1
+    const multiplier = weeksPassed >= 4 ? 4 : weeksPassed
+    return {
+      lastClaim,
+      multiplier,
+    }
   }
 }
 

@@ -74,7 +74,7 @@ export async function getServerWS (
   const timestamp = await getServerTimestamp()
   // await wallet.signMessage(new TextEncoder().encode('Start mining'))
 
-  const wsUrl = new URL(`${POOL_WSS_SERVER}/v2/ws-web`)
+  const wsUrl = new URL(`${POOL_WSS_SERVER}/v2/ws-pubkey`)
   wsUrl.searchParams.append('timestamp', timestamp)
   wsUrl.searchParams.append('pubkey', wallet.publicKey.toString())
 

@@ -70,3 +70,8 @@ export type FullMinerBalanceString = {
   ingot: string,
   wood: string,
 }
+
+export type DiamondHandsMultiplier = {
+  lastClaim: Date | null,
+  multiplier: number
+}

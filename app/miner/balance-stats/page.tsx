@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
+  getDiamondHandsMultiplier,
   getLastChromiumReprocessingEarning,
   getLastDiamondHandsReprocessingEarning,
   getLastMinerSubmission,
@@ -14,6 +15,7 @@ import {
   getPoolDiamondHandsReprocessingInfo
 } from '@/lib/poolUtils'
 import {
+  DiamondHandsMultiplier,
   FullMinerBalanceString,
   MinerBalanceString,
   ReprocessInfoWithDate,
@@ -30,6 +32,10 @@ export default function Page () {
   const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
   const [minerRewardsReprocessChromium, setMinerRewardsReprocessChromium] = useState<FullMinerBalanceString | null>(null)
   const [minerRewardsDiamondHands, setMinerRewardsDiamondHands] = useState<FullMinerBalanceString | null>(null)
+  const [minerDiamondHandsMultiplier, setMinerDiamondHandsMultiplier] = useState<DiamondHandsMultiplier>({
+    lastClaim: null,
+    multiplier: 0
+  })
   const [lastSubmission, setLastSubmission] = useState<SubmissionWithDate | null>(null)
   const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
@@ -113,13 +119,14 @@ export default function Page () {
     }
 
     try {
-      const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning] = await Promise.all([
+      const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning, diamondHandsMultiplier] = await Promise.all([
         getMinerRewards(publicKeyToUse),
         getLastMinerSubmission(publicKeyToUse),
         getPoolChromiumReprocessingInfo(),
         getPoolDiamondHandsReprocessingInfo(),
         getLastChromiumReprocessingEarning(publicKeyToUse),
-        getLastDiamondHandsReprocessingEarning(publicKeyToUse)
+        getLastDiamondHandsReprocessingEarning(publicKeyToUse),
+        getDiamondHandsMultiplier(publicKeyToUse)
       ])
 
       setMinerRewards(rewards)
@@ -128,6 +135,7 @@ export default function Page () {
       setDiamondHandsDatesInfo(diamondHandsInfo)
       setMinerRewardsReprocessChromium(chromiumEarning)
       setMinerRewardsDiamondHands(diamondHandsEarning)
+      setMinerDiamondHandsMultiplier(diamondHandsMultiplier)
 
       const now = Date.now()
       setLastFetchTime(now)
@@ -227,6 +235,8 @@ export default function Page () {
           <CardContent>
             <p>Last Reprocess: {diamondHandsDatesInfo.last_reprocess.toLocaleString()}</p>
             <p>Obtained: {minerRewardsDiamondHands?.coal ?? '-'} COAL - {minerRewardsDiamondHands?.ore ?? '-'} ORE</p>
+            <p>Miner multiplier: {minerDiamondHandsMultiplier.multiplier}x</p>
+            <p>Last Claim: {minerDiamondHandsMultiplier.lastClaim?.toLocaleString() ?? '-'}</p>
             <p>Next Reprocess: {diamondHandsDatesInfo.next_reprocess.toLocaleString()}</p>
           </CardContent>
         </Card>

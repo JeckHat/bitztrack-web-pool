@@ -190,7 +190,11 @@ export async function getMinerLastClaim (publicKey: string): Promise<Date | null
   try {
     const response = await axios.get<{ created_at: string }>(`${POOL_SERVER}/miner/last-claim?pubkey=${publicKey}`)
     console.log('last claim:', response.data.created_at)
-    return parseISO(response.data.created_at + '.000Z')
+    if (response.data.created_at) {
+      return parseISO(response.data.created_at + '.000Z')
+    } else {
+      return null
+    }
   } catch {
     return null
   }
@@ -198,7 +202,7 @@ export async function getMinerLastClaim (publicKey: string): Promise<Date | null
 
 export async function getDiamondHandsMultiplier (publicKey: string): Promise<DiamondHandsMultiplier> {
   const lastClaim = await getMinerLastClaim(publicKey)
-  if (lastClaim === null) {
+  if (!lastClaim) {
     return {
       lastClaim: null,
       multiplier: 4,

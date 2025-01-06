@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,11 +24,11 @@ import {
 } from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
-import { useSearchParams } from 'next/navigation'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function Page () {
+  const router = useRouter()
   const [publicKey, setPublicKey] = useState('')
   const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
   const [minerRewardsReprocessChromium, setMinerRewardsReprocessChromium] = useState<FullMinerBalanceString | null>(null)
@@ -117,6 +118,8 @@ export default function Page () {
       })
       return
     }
+
+    router.push(`?key=${publicKeyToUse}`, { scroll: false })
 
     try {
       const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning, diamondHandsMultiplier] = await Promise.all([

@@ -32,12 +32,15 @@ export default function Page () {
           <CardContent>
             <ol className="list-decimal list-inside space-y-2">
               <li>SSH into your HiveOS system (or use Hive Shell)</li>
-              <li>Run the following commands:
+              <li>Run the following commands and answer Y if prompted:
                 <pre className="bg-muted p-2 rounded-md text-sm overflow-x-auto mt-2">
                   <code>sudo apt-get update</code>
                 </pre>
                 <pre className="bg-muted p-2 rounded-md text-sm overflow-x-auto mt-2">
                   <code>apt install curl git build-essential libssl-dev pkg-config -y</code>
+                </pre>
+                <pre className="bg-muted p-2 rounded-md text-sm overflow-x-auto mt-2">
+                  <code>curl --proto &#39;=https&#39; --tlsv1.2 -sSf https://sh.rustup.rs/ | sh</code>
                 </pre>
               </li>
               <li>Disconnect and restart the machine</li>

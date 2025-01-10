@@ -300,8 +300,8 @@ export default function Page () {
                                      className="underline text-blue-500 hover:text-blue-700">Management Page</Link>
               </p>
               <p>LP Staked: {lpBalance.staked || '0'}</p>
-              <p>Estimated Daily Return: {guildRewards.guildRewards || '0'}</p>
-              <p>Total COAL Rewards: {guildRewards.guildRewards24h || '0'}</p>
+              <p>Estimated Daily Return: {guildRewards.guildRewards24h || '0'}</p>
+              <p>Total COAL Rewards: {guildRewards.guildRewards || '0'}</p>
             </CardContent>
             <CardFooter>
               {/* Uncomment this button when the claim feature is implemented

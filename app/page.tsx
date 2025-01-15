@@ -31,7 +31,7 @@ export default function Page () {
 
           <Tabs defaultValue="overview" className="mt-10">
             <div className="flex flex-row w-full justify-center">
-              <TabsList className="min-w-[50%] grid grid-cols-3 h-fit">
+              <TabsList className="grid w-full grid-col-1 sm:grid-cols-4 h-fit">
                 <TabsTrigger
                   className="text-lg font-medium"
                   value="overview"
@@ -50,15 +50,22 @@ export default function Page () {
                 >
                   Reprocessing
                 </TabsTrigger>
+                <TabsTrigger
+                  className="text-lg font-medium"
+                  value="diamond"
+                >
+                  Diamond Hands
+                </TabsTrigger>
               </TabsList>
             </div>
             <TabsContent value="overview" className="mt-6">
               <h2 className="text-3xl font-bold mb-4">What is the Excalivator Mining Pool?</h2>
               <p className="text-lg leading-relaxed">
                 The Excalivator Mining Pool is an innovative, open-source cryptocurrency mining platform built on the
-                Solana blockchain. Designed for both novice and experienced miners, the pool enables simultaneous mining
-                of <strong>COAL</strong> and <strong>ORE</strong>, along with an additional
-                token, <strong>CHROMIUM</strong>, through a
+                Solana blockchain.<br/>Designed for both novice and experienced miners, the pool enables simultaneous
+                mining
+                of <strong>COAL</strong> and <strong>ORE</strong>, along with <strong>additional tokens</strong>,
+                through a
                 cutting-edge system called <strong>Reprocessing</strong>.
               </p>
             </TabsContent>
@@ -66,7 +73,8 @@ export default function Page () {
             <TabsContent value="features" className="mt-6">
               <h2 className="text-3xl font-bold mb-4">Why Choose Excalivator?</h2>
               <ul className="list-disc list-inside space-y-2">
-                <li><strong>Triple Token Advantage</strong>: Mine COAL, ORE, and CHROMIUM in a single process.</li>
+                <li><strong>Multiple Tokens Advantage</strong>: Mine COAL, ORE, and other tokens in a single process.
+                </li>
                 <li><strong>No Entry Fees</strong>: Join the pool completely free of charge—no hidden costs or setup
                   fees.
                 </li>
@@ -77,11 +85,34 @@ export default function Page () {
             </TabsContent>
 
             <TabsContent value="reprocessing" className="mt-6">
-              <h2 className="text-3xl font-bold mb-4">How Reprocessing Works</h2>
+              <h2 className="text-3xl font-bold mb-4">Unlocking Extra Value with Reprocessing</h2>
               <p className="text-lg leading-relaxed">
-                Reprocessing enhances mining efficiency. By reprocessing mined COAL, the pool unlocks CHROMIUM, a
-                high-value token that adds another layer of profitability to your mining efforts.
+                Reprocessing is our innovative approach to maximize your mining rewards. It works by:
               </p>
+              <ul className="list-disc list-inside space-y-2 mt-2">
+                <li>Analyzing the time miners spend in the pool</li>
+                <li>Evaluating the hash power contributed</li>
+                <li>Distributing additional tokens based on these factors</li>
+              </ul>
+              <p className="text-lg leading-relaxed mt-2">
+                This unique system ensures that your mining efforts are rewarded more comprehensively,
+                boosting overall efficiency and potential earnings.
+              </p>
+            </TabsContent>
+
+            <TabsContent value="diamond" className="mt-6">
+              <h2 className="text-3xl font-bold mb-4">Diamond Hands: Amplify Your Mining Rewards</h2>
+              <p className="text-lg leading-relaxed">
+                Our Diamond Hands system is designed to reward loyal miners who demonstrate long-term commitment.
+                Here&#39;s
+                how it works:
+              </p>
+              <ul className="list-disc list-inside space-y-2 mt-2">
+                <li>Builds upon the reprocessing system, considering your weekly mining performance</li>
+                <li>Rewards increase when you don&#39;t claim your tokens from the pool</li>
+                <li>Multiplier increases each week you don&#39;t claim, up to 4x for 4 consecutive weeks</li>
+                <li>Rewards are sourced from a portion of the pool treasury, accumulated from mining fees</li>
+              </ul>
             </TabsContent>
           </Tabs>
         </div>

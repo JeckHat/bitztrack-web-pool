@@ -37,8 +37,9 @@ export default function Page () {
       </div>
 
       <Tabs defaultValue="features" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-col-1 sm:grid-cols-4 h-fit">
           <TabsTrigger value="features">Features</TabsTrigger>
+          <TabsTrigger value="extra">Extra tokens</TabsTrigger>
           <TabsTrigger value="structure">Structure</TabsTrigger>
           <TabsTrigger value="transparency">Transparency</TabsTrigger>
         </TabsList>
@@ -50,8 +51,8 @@ export default function Page () {
             </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
-                <li>Mine <strong>COAL, ORE, CHROMIUM</strong> tokens at the same time</li>
-                <li>Easy to setup hotwallet</li>
+                <li>Mine <strong>COAL, ORE, and other tokens</strong> at the same time</li>
+                <li>Easy to setup <strong>hotwallet</strong> or mine with a <strong>public key</strong> only</li>
                 <li>Mine with the same key from multiple devices</li>
                 <li>Option to use a different wallet for withdrawals</li>
                 <li>Pickaxe-boosted rewards for all miners
@@ -64,6 +65,44 @@ export default function Page () {
           </Card>
         </TabsContent>
 
+        <TabsContent value="extra">
+          <Card>
+            <CardHeader>
+              <CardTitle>Extra Tokens and Reward Systems</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <h3 className="text-xl font-semibold mb-4">CHROMIUM Reprocessing System</h3>
+              <p className="mb-4">
+                The CHROMIUM reprocessing system is designed to reward miners with additional tokens based on their
+                contribution to the pool.
+              </p>
+              <ul className="list-disc pl-5 space-y-2 mb-6">
+                <li>CHROMIUM is reprocessed and distributed every 3 days</li>
+                <li>Distribution is based on each miner&#39;s active time and hashpower contribution</li>
+                <li>Miners can claim CHROMIUM along with other resources</li>
+                <li>CHROMIUM can be used for crafting and enhancing mining tools</li>
+              </ul>
+
+              <h3 className="text-xl font-semibold mb-4">Diamond Hands System</h3>
+              <p className="mb-4">
+                The Diamond Hands system is a reward mechanism designed to incentivize long-term commitment and
+                consistent mining. The rewards comes directly from the pool treasury.
+              </p>
+              <ul className="list-disc pl-5 space-y-2 mb-4">
+                <li>Diamond Hands is reprocessed and distributed every 7 days</li>
+                <li>Mine consistently to maintain strong weekly performance</li>
+                <li>Resist the urge to claim your tokens for at least one week</li>
+                <li>Continue mining and holding for up to 4 weeks to maximize your rewards</li>
+                <li>Enjoy extra COAL and ORE rewards when you finally decide to claim</li>
+              </ul>
+              <p className="italic">
+                Note: The Diamond Hands system is designed to reward patience and commitment. However, you&#39;re always
+                free to claim your tokens at any time if needed.
+              </p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="structure">
           <Card>
             <CardHeader>
@@ -72,7 +111,7 @@ export default function Page () {
             <CardContent>
               <h3 className="text-lg font-semibold mb-2">Fees</h3>
               <p>5% COAL and ORE fee from each mined transaction</p>
-              <p>5% CHROMIUM fee for each reprocessing</p>
+              <p>5% fee for each reprocessing</p>
 
               <h3 className="text-lg font-semibold mt-4 mb-2">Signup</h3>
               <p>Free to join (0 cost)</p>

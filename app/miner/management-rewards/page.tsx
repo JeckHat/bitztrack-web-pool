@@ -212,7 +212,7 @@ export default function StakingPage () {
       {renderTitleAndSubtitle()}
 
       <Tabs defaultValue="miner" className="w-full" onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-col-1 sm:grid-cols-2 h-fit">
           <TabsTrigger value="miner">Miner Rewards</TabsTrigger>
           <TabsTrigger value="pool">Pool Stake</TabsTrigger>
         </TabsList>

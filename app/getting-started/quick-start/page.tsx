@@ -30,7 +30,7 @@ export default function Page () {
                 official Rust installation guide
               </a>.</p>
             <Tabs defaultValue="linux" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-col-1 sm:grid-cols-3 h-fit">
                 <TabsTrigger value="linux">Linux</TabsTrigger>
                 <TabsTrigger value="macos">macOS</TabsTrigger>
                 <TabsTrigger value="windows">Windows</TabsTrigger>

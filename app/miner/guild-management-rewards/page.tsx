@@ -245,7 +245,7 @@ export default function Page () {
       {renderTitleAndSubtitle()}
 
       <Tabs defaultValue="rewards" className="w-full" onValueChange={setSelectedTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-col-1 sm:grid-cols-3 h-fit">
           <TabsTrigger value="rewards">Guild Rewards</TabsTrigger>
           <TabsTrigger value="stake">Guild Stake</TabsTrigger>
           <TabsTrigger value="unstake">Guild Unstake</TabsTrigger>

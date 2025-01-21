@@ -1,6 +1,6 @@
 'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card'
+import { Card, CardContent } from '../../../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
@@ -63,9 +63,6 @@ export default function Page () {
 
         <TabsContent value="features">
           <Card>
-            <CardHeader>
-              <CardTitle>Pool Features</CardTitle>
-            </CardHeader>
             <CardContent>
               <ul className="list-disc pl-5 space-y-2">
                 <li>Mine <strong>COAL, ORE, and other tokens</strong> at the same time</li>
@@ -84,9 +81,6 @@ export default function Page () {
 
         <TabsContent value="extra">
           <Card>
-            <CardHeader>
-              <CardTitle>Extra Tokens and Reward Systems</CardTitle>
-            </CardHeader>
             <CardContent>
               <h3 className="text-xl font-semibold mb-4">Diamond Hands System 💎</h3>
               <p className="mb-4">
@@ -122,9 +116,6 @@ export default function Page () {
 
         <TabsContent value="structure">
           <Card>
-            <CardHeader>
-              <CardTitle>Pool Structure</CardTitle>
-            </CardHeader>
             <CardContent>
               <h3 className="text-lg font-semibold mb-2">Fees</h3>
               <p>5% COAL and ORE fee from each mined transaction</p>
@@ -160,9 +151,6 @@ export default function Page () {
 
         <TabsContent value="transparency">
           <Card>
-            <CardHeader>
-              <CardTitle>Transparency Policy</CardTitle>
-            </CardHeader>
             <CardContent>
               <p className="mb-4">The pool is committed to full transparency about handling and fund usage.<br/>All
                 pool-related addresses are publicly disclosed and can be verified on-chain.</p>

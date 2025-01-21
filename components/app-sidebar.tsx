@@ -111,6 +111,17 @@ const data: MenuData[] = [
       },
     ],
   },
+  /*{
+    title: 'Community',
+    url: '/community',
+    icon: GroupIcon,
+    items: [
+      {
+        title: 'Ore Mining Corp.',
+        url: '/community/omc',
+      },
+    ],
+  },*/
 ]
 
 export function AppSidebar ({ ...props }: React.ComponentProps<typeof Sidebar>) {

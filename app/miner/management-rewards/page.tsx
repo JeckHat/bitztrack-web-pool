@@ -14,6 +14,7 @@ import { getMinerRewards, getPoolStakeAndMultipliers, getTokenBalance } from '..
 import { RefreshCw } from 'lucide-react'
 import { MinerBalanceString, StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 import { claimRewards, MINIMUM_CLAIM_AMOUNT_COAL, MINIMUM_CLAIM_AMOUNT_ORE } from '../../../lib/claimRewards'
+import Link from 'next/link'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -272,10 +273,18 @@ export default function StakingPage () {
               {meetsMinimumRequirements() && (
                 <div>
                   <p className="text-red-500 mt-2">
+                    Warning: Claiming your rewards will reset your diamond hand system multiplier and also forfeit your
+                    extra allocation for this week.
+                  </p>
+                  <Link href="/info/pool-details?tab=extra"
+                        className="underline text-blue-500 hover:text-blue-700 text-xl">
+                    Find out more about the Diamond Hands System 💎
+                  </Link>
+                  <p className="text-yellow-500 mt-2 text-sm">
                     Please note: It may take up to 10 minutes for your claimed rewards to appear in your wallet as claim
                     are done in batches.
                   </p>
-                  <p className="text-red-500 mt-2">
+                  <p className="text-yellow-500 mt-2 text-sm">
                     For each token account not present in your wallet a deduction from rewards of 4 COAL or 0.02 ORE
                     (depending on
                     what you have available) will be applied.

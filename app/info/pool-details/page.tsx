@@ -6,8 +6,13 @@ import Link from 'next/link'
 import React, { useEffect, useState } from 'react'
 import { getPoolStakeAndMultipliers } from '../../../lib/poolUtils'
 import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function Page () {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [activeTab, setActiveTab] = useState('features')
+
   const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
 
   useEffect(() => {
@@ -16,6 +21,13 @@ export default function Page () {
     }
   }, [poolStakeAndMultipliers])
 
+  useEffect(() => {
+    const tab = searchParams?.get('tab')
+    if (tab && ['features', 'extra', 'structure', 'transparency'].includes(tab)) {
+      setActiveTab(tab)
+    }
+  }, [])
+
   const fetchPoolStakeAndMultipliers = async () => {
     try {
       const response = await getPoolStakeAndMultipliers()
@@ -23,6 +35,11 @@ export default function Page () {
     } catch (error) {
       console.error('Failed to fetch pool stake and multipliers:', error)
     }
+  }
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    router.push(`?tab=${value}`, { scroll: false })
   }
 
   return (
@@ -36,7 +53,7 @@ export default function Page () {
           each mining transaction.</p>
       </div>
 
-      <Tabs defaultValue="features" className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-col-1 sm:grid-cols-4 h-fit">
           <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="extra">Extra tokens</TabsTrigger>
@@ -71,34 +88,34 @@ export default function Page () {
               <CardTitle>Extra Tokens and Reward Systems</CardTitle>
             </CardHeader>
             <CardContent>
-              <h3 className="text-xl font-semibold mb-4">CHROMIUM Reprocessing System</h3>
-              <p className="mb-4">
-                The CHROMIUM reprocessing system is designed to reward miners with additional tokens based on their
-                contribution to the pool.
-              </p>
-              <ul className="list-disc pl-5 space-y-2 mb-6">
-                <li>CHROMIUM is reprocessed and distributed every 3 days</li>
-                <li>Distribution is based on each miner&#39;s active time and hashpower contribution</li>
-                <li>Miners can claim CHROMIUM along with other resources</li>
-                <li>CHROMIUM can be used for crafting and enhancing mining tools</li>
-              </ul>
-
-              <h3 className="text-xl font-semibold mb-4">Diamond Hands System</h3>
+              <h3 className="text-xl font-semibold mb-4">Diamond Hands System 💎</h3>
               <p className="mb-4">
                 The Diamond Hands system is a reward mechanism designed to incentivize long-term commitment and
                 consistent mining. The rewards comes directly from the pool treasury.
               </p>
               <ul className="list-disc pl-5 space-y-2 mb-4">
-                <li>Diamond Hands is reprocessed and distributed every 7 days</li>
+                <li>Diamond Hands is reprocessed and <strong>distributed every 7 days</strong></li>
                 <li>Mine consistently to maintain strong weekly performance</li>
                 <li>Resist the urge to claim your tokens for at least one week</li>
                 <li>Continue mining and holding for up to 4 weeks to maximize your rewards</li>
-                <li>Enjoy extra COAL and ORE rewards when you finally decide to claim</li>
+                <li>Enjoy <strong>extra COAL and ORE</strong> rewards when you finally decide to claim</li>
               </ul>
-              <p className="italic">
+              <p className="italic mb-10">
                 Note: The Diamond Hands system is designed to reward patience and commitment. However, you&#39;re always
                 free to claim your tokens at any time if needed.
               </p>
+
+              <h3 className="text-xl font-semibold mb-4">CHROMIUM Reprocessing System</h3>
+              <p className="mb-4">
+                The CHROMIUM reprocessing system is designed to reward miners with additional tokens based on their
+                contribution to the pool.
+              </p>
+              <ul className="list-disc pl-5 space-y-2">
+                <li>CHROMIUM is reprocessed and distributed every 3 days</li>
+                <li>Distribution is based on each miner&#39;s active time and hashpower contribution</li>
+                <li>Miners can claim CHROMIUM along with other resources</li>
+                <li>CHROMIUM can be used for crafting and enhancing mining tools</li>
+              </ul>
             </CardContent>
           </Card>
         </TabsContent>

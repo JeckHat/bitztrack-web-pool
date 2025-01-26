@@ -1,10 +1,38 @@
+'use client'
+
 import { Button } from '../components/ui/button'
 import Link from 'next/link'
 import { Card } from '../components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import Image from 'next/image'
+import { useEffect, useState } from 'react'
+import { getCurrentMinersCount } from '../lib/poolUtils'
+import { toast } from '../hooks/use-toast'
 
 export default function Page () {
+
+  const [minersCount, setMinersCount] = useState('-')
+
+  useEffect(() => {
+    getMinersCount()
+  }, [])
+
+  const getMinersCount = async () => {
+    try {
+      const [miners] = await Promise.all([
+        getCurrentMinersCount()
+      ])
+
+      setMinersCount(miners)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch miner stats. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4">
@@ -27,6 +55,8 @@ export default function Page () {
               <h1 className="text-5xl font-extrabold ">Welcome to the Excalivator Mining Pool</h1>
             </div>
             <p className="text-xl font-light">Your Gateway to Efficient, Multi-Token Crypto Mining on Solana</p>
+            <p className="text-xl"><b>{minersCount}</b> miners are connected to the pool. Join the mining revolution!
+            </p>
           </header>
 
           <Tabs defaultValue="overview" className="mt-10">

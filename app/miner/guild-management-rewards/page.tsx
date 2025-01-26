@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../../c
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
 import {
+  getGuildLpStats,
   getLPStake,
   getMinerGuildStakeRewards,
   getMinerGuildStakeRewards24h,
@@ -14,7 +15,7 @@ import {
 } from '../../../lib/poolUtils'
 import { COAL_SOL_LP_MINT_ADDRESS } from '../../../lib/constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
-import { StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
+import { AvgGuildRewards, StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 import { RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { unstakeFromGuild } from '../../../lib/unstakeFromGuild'
@@ -28,6 +29,7 @@ export default function Page () {
   const wallet = useWallet()
   const { toast } = useToast()
   const [guildRewards, setGuildRewards] = useState({ guildRewards: '0', guildRewards24h: '0' })
+  const [avgGuildRewards, setAvgGuildRewards] = useState<AvgGuildRewards | null>(null)
   const [lpBalance, setLpBalance] = useState({ staked: 0, wallet: 0 })
   const [unstakeAmount, setUnstakeAmount] = useState('')
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
@@ -78,6 +80,28 @@ export default function Page () {
     return () => clearInterval(timer)
   }, [lastFetchTime])
 
+  useEffect(() => {
+    if (!avgGuildRewards) {
+      fetchGuildLpStats()
+    }
+  }, [avgGuildRewards])
+
+  const fetchGuildLpStats = async () => {
+    try {
+      const [guildLpStats] = await Promise.all([
+        getGuildLpStats()])
+
+      setAvgGuildRewards(guildLpStats)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch guild data. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
+
   const fetchData = async () => {
     if (wallet.publicKey) {
       if (cooldownRemaining > 0) {
@@ -109,13 +133,13 @@ export default function Page () {
 
         toast({
           title: 'Data Fetched',
-          description: 'Claim rewards data has been updated.',
+          description: 'Guild data has been updated.',
         })
       } catch (error) {
         console.error('Error fetching data:', error)
         toast({
           title: 'Error',
-          description: 'Failed to fetch claim rewards data. Please try again.',
+          description: 'Failed to fetch guild data. Please try again.',
           variant: 'destructive',
         })
       }
@@ -274,23 +298,6 @@ export default function Page () {
                     tokens
                     are staked.
                   </li>
-                  <li>
-                    The Excalivator Mining Pool has <strong>partnered</strong> with GPOOL, creating a guild coalition
-                    allowing
-                    you to earn
-                    additional
-                    LP rewards from <strong>both pools</strong>.
-                  </li>
-                  <li>
-                    Visit the <a
-                    href="https://dashboard.gpool.cloud/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    GPOOL dashboard
-                  </a> to claim your LP staking rewards.
-                  </li>
                 </ul>
               </div>
               <p className="text-yellow-500 font-semibold">
@@ -300,15 +307,23 @@ export default function Page () {
                                      className="underline text-blue-500 hover:text-blue-700">Management Page</Link>
               </p>
               <p>LP Staked: {lpBalance.staked || '0'}</p>
-              <p>Estimated Daily Return: {guildRewards.guildRewards24h || '0'}</p>
-              <p>Total COAL Rewards: {guildRewards.guildRewards || '0'}</p>
+              <p>Estimated Miner Daily Return: {guildRewards.guildRewards24h || '0'}</p>
+              <p>Total Miner COAL Rewards: {guildRewards.guildRewards || '0'}</p>
+              <p>Avg. COAL Rewards for 1LP 24h: {avgGuildRewards?.last_24h ?? '-'} -
+                7d: {avgGuildRewards?.last_7d ?? '-'} -
+                30d {avgGuildRewards?.last_30d ?? '-'}</p>
             </CardContent>
             <CardFooter>
-              {/* Uncomment this button when the claim feature is implemented
-      <Button onClick={handleClaimGuildRewards} disabled={true}>
-        <strong>CLAIM GUILD REWARDS</strong>
-      </Button>
-      */}
+              <div className="flex flex-col">
+                <p className="text-sm italic">
+                  The &#34;Estimated Miner Daily Return&#34; are based on the performance of the previous 24h
+                </p>
+                <p className="text-sm italic">
+                  The &#34;Avg. COAL Rewards for 1LP&#34; are based on the performance of the previous period
+                  considering
+                  the current amount of LP in pool
+                </p>
+              </div>
             </CardFooter>
           </Card>
         </TabsContent>

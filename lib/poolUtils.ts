@@ -2,6 +2,7 @@ import { BlockhashWithExpiryBlockHeight, PublicKey, PublicKeyInitData, Transacti
 import { getAssociatedTokenAddress } from '@solana/spl-token'
 import axios from 'axios'
 import {
+  AvgGuildRewards,
   BalanceData,
   BlockhashData,
   DiamondHandsMultiplier,
@@ -54,6 +55,19 @@ export async function getLPStake (publicKey: PublicKey): Promise<number> {
     return response.data
   } catch {
     return 0
+  }
+}
+
+export async function getGuildLpStats (): Promise<AvgGuildRewards> {
+  try {
+    const response = await axios.get<AvgGuildRewards>(`${POOL_SERVER}/guild/lp-staking-rewards-stats`)
+    return response.data
+  } catch {
+    return {
+      last_30d: '0',
+      last_7d: '0',
+      last_24h: '0'
+    }
   }
 }
 
@@ -292,5 +306,14 @@ export async function getLastDiamondHandsReprocessingEarning (publicKey: string)
       ingot: '-',
       wood: '-',
     }
+  }
+}
+
+export async function getCurrentMinersCount (): Promise<string> {
+  try {
+    const response = await axios.get<number>(`${POOL_SERVER}/active-miners`)
+    return response.data.toString()
+  } catch {
+    return '-'
   }
 }

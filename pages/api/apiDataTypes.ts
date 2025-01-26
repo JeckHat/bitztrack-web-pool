@@ -75,3 +75,9 @@ export type DiamondHandsMultiplier = {
   lastClaim: Date | null,
   multiplier: number
 }
+
+export type AvgGuildRewards = {
+  last_24h: string,
+  last_7d: string,
+  last_30d: string
+}

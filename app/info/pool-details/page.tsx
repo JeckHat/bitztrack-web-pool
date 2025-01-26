@@ -88,7 +88,7 @@ export default function Page () {
                 consistent mining. The rewards comes directly from the pool treasury.
               </p>
               <ul className="list-disc pl-5 space-y-2 mb-4">
-                <li>Diamond Hands is reprocessed and <strong>distributed every 7 days</strong></li>
+                <li>Diamond Hands is reprocessed and <strong>distributed every 7 days on sunday</strong></li>
                 <li>Mine consistently to maintain strong weekly performance</li>
                 <li>Resist the urge to claim your tokens for at least one week</li>
                 <li>Continue mining and holding for up to 4 weeks to maximize your rewards</li>

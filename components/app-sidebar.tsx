@@ -94,7 +94,7 @@ const data: MenuData[] = [
     icon: GiMiner,
     items: [
       {
-        title: 'Balance',
+        title: 'Balance & Stats',
         url: '/miner/balance-stats',
       },
       {

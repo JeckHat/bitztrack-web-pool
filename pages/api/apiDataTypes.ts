@@ -81,3 +81,33 @@ export type AvgGuildRewards = {
   last_7d: string,
   last_30d: string
 }
+
+export type SubmissionEarningMinerInfoApi = {
+  miner_id: number,
+  challenge_id: number,
+  pubkey: string,
+  miner_amount_coal: number,
+  miner_amount_ore: number,
+  best_difficulty: number,
+  miner_difficulty: number,
+  best_challenge_hashpower: number,
+  miner_hashpower: number,
+  created_at: string,
+  total_rewards_earned_coal: number,
+  total_rewards_earned_ore: number
+}
+
+export type SubmissionEarningMinerInfo = {
+  minerId: number,
+  challengeId: number,
+  pubkey: string,
+  minerAmountCoal: number,
+  minerAmountOre: number,
+  bestDifficulty: number,
+  minerDifficulty: number,
+  bestChallengeHashpower: number,
+  minerHashpower: number,
+  createdAt: Date,
+  totalRewardsEarnedCoal: number,
+  totalRewardsEarnedOre: number
+}

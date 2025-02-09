@@ -209,7 +209,7 @@ export default function StakingPage () {
   }
 
   return (
-    <div className="max-w-4xl w-[min(56rem,100vw)]  mx-auto px-6 py-10">
+    <div className="px-6 py-10">
       {renderTitleAndSubtitle()}
 
       <Tabs defaultValue="miner" className="w-full" onValueChange={setSelectedTab}>

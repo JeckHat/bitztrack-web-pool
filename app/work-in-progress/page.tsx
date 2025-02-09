@@ -1,6 +1,6 @@
 export default function Page () {
   return (
-    <div className="max-w-4xl w-[min(56rem,100vw)]  mx-auto px-6 py-10 flex flex-col items-center text-center">
+    <div className="px-6 py-10 flex flex-col items-center text-center">
       <h1 className="text-4xl font-bold mb-4">Work in Progress</h1>
       <p className="text-lg leading-relaxed mb-6">
         This page is currently under development. We&#39;re working hard to bring you exciting new features. Stay tuned!

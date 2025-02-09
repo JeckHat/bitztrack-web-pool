@@ -11,6 +11,7 @@ import {
   getLastChromiumReprocessingEarning,
   getLastDiamondHandsReprocessingEarning,
   getLastMinerSubmission,
+  getMinerEarningsSubmissions,
   getMinerRewards,
   getPoolChromiumReprocessingInfo,
   getPoolDiamondHandsReprocessingInfo
@@ -20,10 +21,13 @@ import {
   FullMinerBalanceString,
   MinerBalanceString,
   ReprocessInfoWithDate,
+  SubmissionEarningMinerInfo,
   SubmissionWithDate
 } from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import ChallengeEarningsTable from '../../../components/challenge-earnings-table'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -40,12 +44,15 @@ export default function Page () {
   const [lastSubmission, setLastSubmission] = useState<SubmissionWithDate | null>(null)
   const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
+  const [challengeEarnings, setChallengeEarnings] = useState<SubmissionEarningMinerInfo[]>([])
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const { toast } = useToast()
   const [suggestions, setSuggestions] = useState<{ value: string; label: string }[]>([])
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const searchParams = useSearchParams()
+  const [loadingRewards, setLoadingRewards] = useState(false)
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false)
 
   useEffect(() => {
     try {
@@ -121,6 +128,8 @@ export default function Page () {
 
     router.push(`?key=${publicKeyToUse}`, { scroll: false })
 
+    setLoadingRewards(true)
+
     try {
       const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning, diamondHandsMultiplier] = await Promise.all([
         getMinerRewards(publicKeyToUse),
@@ -146,6 +155,8 @@ export default function Page () {
 
       updateRecentAddresses(publicKeyToUse)
 
+      getChallengeEarnings(publicKeyToUse)
+
       toast({
         title: 'Data Fetched',
         description: 'Miner stats have been updated.',
@@ -158,11 +169,63 @@ export default function Page () {
         variant: 'destructive',
       })
     }
+
+    setLoadingRewards(false)
+  }
+
+  const getChallengeEarnings = async (key?: string) => {
+    const publicKeyToUse = key || publicKey
+    if (!publicKeyToUse) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a public key',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    if (cooldownRemaining > 0) {
+      toast({
+        title: 'Cooldown Active',
+        description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
+        variant: 'destructive',
+      })
+      return
+    }
+
+    router.push(`?key=${publicKeyToUse}`, { scroll: false })
+
+    setLoadingSubmissions(true)
+
+    try {
+      const submissionNow = new Date()
+      const submissionTwentyFourHoursAgo = new Date(submissionNow.getTime() - 12 * 60 * 60 * 1000)
+
+      const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionTwentyFourHoursAgo, submissionNow)
+      console.log('earnings -->', earnings)
+      setChallengeEarnings(earnings)
+      const now = Date.now()
+      setLastFetchTime(now)
+      localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
+      updateRecentAddresses(publicKeyToUse)
+      toast({
+        title: 'Data Fetched',
+        description: 'Miner stats have been updated.',
+      })
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch miner stats. Please try again.',
+        variant: 'destructive',
+      })
+    }
+    setLoadingSubmissions(false)
   }
 
   return (
-    <div className="max-w-4xl w-[min(56rem,100vw)]  mx-auto px-6 py-10">
-      <h1 className="text-4xl font-bold text-center mb-8">Miner balances</h1>
+    <div className="px-6 py-10">
+      <h1 className="text-4xl font-bold text-center mb-8">Miner Info</h1>
       <div className="text-center mb-6">
         <p className="text-lg leading-relaxed">
           Put a public address in the input field to fetch the miner&#39;s balance.
@@ -192,58 +255,119 @@ export default function Page () {
           </PopoverContent>
         </Popover>
       </div>
-      {minerRewards && (
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle>Miner Rewards</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Coal: {minerRewards.coal}</p>
-            <p>Ore: {minerRewards.ore}</p>
-            <p>Chromium: {minerRewards.chromium}</p>
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="rewards" className="w-full">
+        <TabsList className="grid w-full grid-col-1 sm:grid-cols-2 h-fit">
+          <TabsTrigger value="rewards">Rewards</TabsTrigger>
+          <TabsTrigger value="submissions">Submissions</TabsTrigger>
+        </TabsList>
+        <TabsContent value="rewards">
+          {loadingRewards && (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <div className="flex flex-row gap-2 items-center">
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                    <span>Loading...</span>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          )}
+          {!publicKey && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Search a public key to see rewards</CardTitle>
+              </CardHeader>
+            </Card>
+          )}
+          {minerRewards && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Miner Rewards</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Coal: {minerRewards.coal}</p>
+                <p>Ore: {minerRewards.ore}</p>
+                <p>Chromium: {minerRewards.chromium}</p>
+              </CardContent>
+            </Card>
+          )}
 
-      {lastSubmission && (
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle>Last Submission</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Difficulty: {lastSubmission.difficulty}</p>
-            <p>Mined at: {lastSubmission.created_at.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-      )}
+          {lastSubmission && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Last Submission</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Difficulty: {lastSubmission.difficulty}</p>
+                <p>Mined at: {lastSubmission.created_at.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          )}
 
-      {chromiumDatesInfo && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Chromium Reprocessing Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Last Reprocess: {chromiumDatesInfo.last_reprocess.toLocaleString()}</p>
-            <p>Obtained: {minerRewardsReprocessChromium?.chromium ?? '-'} CHROMIUM</p>
-            <p>Next Reprocess: {chromiumDatesInfo.next_reprocess.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-      )}
+          {chromiumDatesInfo && (
+            <Card className="mb-4">
+              <CardHeader>
+                <CardTitle>Chromium Reprocessing Info</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Last Reprocess: {chromiumDatesInfo.last_reprocess.toLocaleString()}</p>
+                <p>Obtained: {minerRewardsReprocessChromium?.chromium ?? '-'} CHROMIUM</p>
+                <p>Next Reprocess: {chromiumDatesInfo.next_reprocess.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          )}
 
-      {diamondHandsDatesInfo && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Diamond Hands Info</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p>Last Reprocess: {diamondHandsDatesInfo.last_reprocess.toLocaleString()}</p>
-            <p>Obtained: {minerRewardsDiamondHands?.coal ?? '-'} COAL - {minerRewardsDiamondHands?.ore ?? '-'} ORE</p>
-            <p>Miner multiplier: {minerDiamondHandsMultiplier.multiplier}x</p>
-            <p>Last Claim: {minerDiamondHandsMultiplier.lastClaim?.toLocaleString() ?? '-'}</p>
-            <p>Next Reprocess: {diamondHandsDatesInfo.next_reprocess.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-      )}
+          {diamondHandsDatesInfo && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Diamond Hands Info</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Last Reprocess: {diamondHandsDatesInfo.last_reprocess.toLocaleString()}</p>
+                <p>Main rewards: {minerRewardsDiamondHands?.coal ?? '-'} COAL
+                  - {minerRewardsDiamondHands?.ore ?? '-'} ORE</p>
+                <p>Extra rewards: {minerRewardsDiamondHands?.ingot ?? '-'} INGOT
+                  - {minerRewardsDiamondHands?.wood ?? '-'} WOOD</p>
+                <p>Miner multiplier: {minerDiamondHandsMultiplier.multiplier}x</p>
+                <p>Last Claim: {minerDiamondHandsMultiplier.lastClaim?.toLocaleString() ?? '-'}</p>
+                <p>Next Reprocess: {diamondHandsDatesInfo.next_reprocess.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        <TabsContent value="submissions">
+          {loadingSubmissions && (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <div className="flex flex-row gap-2 items-center">
+                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                    <span>Loading...</span>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          )}
+          {!publicKey && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Search a public key to see rewards</CardTitle>
+              </CardHeader>
+            </Card>
+          )}
+          {publicKey && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Last 12h rewards</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChallengeEarningsTable data={challengeEarnings}/>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { BlockhashWithExpiryBlockHeight, PublicKey, PublicKeyInitData, TransactionInstruction } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import {
   AvgGuildRewards,
   BalanceData,
@@ -15,20 +15,33 @@ import {
   StakeAndMultipliers,
   StakeAndMultipliersString,
   Submission,
+  SubmissionEarningMinerInfo,
+  SubmissionEarningMinerInfoApi,
   SubmissionWithDate
 } from '../pages/api/apiDataTypes'
 import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
 import { parseISO } from 'date-fns'
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+const requestCache = new Map<string, Promise<AxiosResponse<any, any>>>()
+
 export async function getTokenBalance (publicKey: PublicKey, mintAddress: PublicKey): Promise<number> {
+
   const tokenAccount = await getAssociatedTokenAddress(mintAddress, publicKey)
   let response
+  const cacheKey = `getTokenBalance-${publicKey.toString()}-${mintAddress.toString()}`
   try {
-    response = await axios.post<BalanceData>('/api/get-balance', { tokenAccount: tokenAccount.toString() })
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.post<BalanceData>('/api/get-balance', { tokenAccount: tokenAccount.toString() })
+      requestCache.set(cacheKey, targetCall)
+    }
+    response = await targetCall
   } catch (err) {
     console.error(err)
     return 0
   }
+  requestCache.delete(cacheKey)
   const balance = response.data.balance
   return parseFloat(balance.value.amount) / Math.pow(10, balance.value.decimals)
 }
@@ -177,8 +190,15 @@ export async function getMinerRewards (publicKey: string): Promise<MinerBalanceS
 
 export async function getMinerSubmissions (publicKey: string): Promise<SubmissionWithDate[]> {
   try {
-    const response = await axios.get<Submission[]>(`${POOL_SERVER}/miner/submissions?pubkey=${publicKey}`)
-    return response.data.map(x => {
+    const cacheKey = `getMinerSubmissions-${publicKey}`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<Submission[]>(`${POOL_SERVER}/miner/submissions?pubkey=${publicKey}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
+    return response.data.map((x: Submission) => {
       const sub: SubmissionWithDate = {
         created_at: parseISO(x.created_at + '.000Z'),
         difficulty: x.difficulty,
@@ -202,7 +222,14 @@ export async function getLastMinerSubmission (publicKey: string): Promise<Submis
 
 export async function getMinerLastClaim (publicKey: string): Promise<Date | null> {
   try {
-    const response = await axios.get<{ created_at: string }>(`${POOL_SERVER}/miner/last-claim?pubkey=${publicKey}`)
+    const cacheKey = `getMinerLastClaim-${publicKey}`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<{ created_at: string }>(`${POOL_SERVER}/miner/last-claim?pubkey=${publicKey}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
     console.log('last claim:', response.data.created_at)
     if (response.data.created_at) {
       return parseISO(response.data.created_at + '.000Z')
@@ -235,7 +262,14 @@ export async function getDiamondHandsMultiplier (publicKey: string): Promise<Dia
 
 export async function getPoolChromiumReprocessingInfo (): Promise<ReprocessInfoWithDate> {
   try {
-    const response = await axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/chromium-info`)
+    const cacheKey = `getPoolChromiumReprocessingInfo`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/chromium-info`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
     return {
       last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
       next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
@@ -250,7 +284,14 @@ export async function getPoolChromiumReprocessingInfo (): Promise<ReprocessInfoW
 
 export async function getPoolDiamondHandsReprocessingInfo (): Promise<ReprocessInfoWithDate> {
   try {
-    const response = await axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/diamond-hands-info`)
+    const cacheKey = `getPoolDiamondHandsReprocessingInfo`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/diamond-hands-info`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
     return {
       last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
       next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
@@ -265,7 +306,14 @@ export async function getPoolDiamondHandsReprocessingInfo (): Promise<ReprocessI
 
 export async function getLastChromiumReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
   try {
-    const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-chromium?pubkey=${publicKey}`)
+    const cacheKey = `getLastChromiumReprocessingEarning-${publicKey}`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-chromium?pubkey=${publicKey}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
     return {
       sol: response.data.sol?.toString() ?? '-',
       coal: response.data.coal?.toString() ?? '-',
@@ -288,7 +336,14 @@ export async function getLastChromiumReprocessingEarning (publicKey: string): Pr
 
 export async function getLastDiamondHandsReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
   try {
-    const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
+    const cacheKey = `getLastDiamondHandsReprocessingEarning-${publicKey}`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
     return {
       sol: response.data.sol?.toString() ?? '-',
       coal: response.data.coal?.toString() ?? '-',
@@ -315,5 +370,37 @@ export async function getCurrentMinersCount (): Promise<string> {
     return response.data.toString()
   } catch {
     return '-'
+  }
+}
+
+export async function getMinerEarningsSubmissions (pubkey: string, fromDate: Date, toDate: Date): Promise<SubmissionEarningMinerInfo[]> {
+  const cacheKey = `getMinerEarningsSubmissions-${pubkey}`
+  try {
+    console.log('fromDate:', fromDate.toISOString())
+    console.log('toDate:', toDate.toISOString())
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<SubmissionEarningMinerInfoApi[]>(`${POOL_SERVER}/miner/earnings-submissions?pubkey=${pubkey}&start_time=${Math.round(fromDate.getTime() / 1000)}&end_time=${Math.round(toDate.getTime() / 1000)}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
+    return response.data.map((x: SubmissionEarningMinerInfoApi) => ({
+      minerId: x.miner_id,
+      bestChallengeHashpower: x.best_challenge_hashpower,
+      bestDifficulty: x.best_difficulty,
+      challengeId: x.challenge_id,
+      createdAt: parseISO(x.created_at + '.000Z'),
+      minerAmountCoal: x.miner_amount_coal,
+      minerAmountOre: x.miner_amount_ore,
+      minerDifficulty: x.miner_difficulty,
+      minerHashpower: x.miner_hashpower,
+      pubkey: x.pubkey,
+      totalRewardsEarnedCoal: x.total_rewards_earned_coal,
+      totalRewardsEarnedOre: x.total_rewards_earned_ore,
+    }))
+  } catch {
+    requestCache.delete(cacheKey)
+    return []
   }
 }

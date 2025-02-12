@@ -47,7 +47,9 @@ export default function Page () {
   const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [challengeEarnings, setChallengeEarnings] = useState<SubmissionEarningMinerInfo[]>([])
   const [avgPersonalHash, setAvgPersonalHash] = useState<number>(0)
+  const [personalSubmissionsCount, setPersonalSubmissionsCount] = useState<number>(0)
   const [avgPoolHash, setAvgPoolHash] = useState<number>(0)
+  const [poolSubmissionsCount, setPoolSubmissionsCount] = useState<number>(0)
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const { toast } = useToast()
@@ -208,9 +210,13 @@ export default function Page () {
       console.log('earnings -->', earnings)
       setChallengeEarnings(earnings)
 
+      const poolSubmissions = new Set(earnings.map(entry => entry.challengeId)).size
+      setPoolSubmissionsCount(poolSubmissions)
+
       // calculate the avg personal and pool hash
       const totalPersonalHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.minerHashpower)), 0)
       setAvgPersonalHash(Math.round(parseFloat(bigDecimal.divide(totalPersonalHash, earnings.length))))
+      setPersonalSubmissionsCount(earnings.length)
       const totalPoolHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.bestChallengeHashpower)), 0)
       setAvgPoolHash(Math.round(parseFloat(bigDecimal.divide(totalPoolHash, earnings.length))))
 
@@ -347,7 +353,7 @@ export default function Page () {
           )}
         </TabsContent>
         <TabsContent value="submissions">
-          {loadingSubmissions && (
+          {(loadingSubmissions || loadingRewards) && (
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -366,11 +372,12 @@ export default function Page () {
               </CardHeader>
             </Card>
           )}
-          {publicKey && (
+          {challengeEarnings.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle>Last 12h rewards - Avg Personal H/s: {avgPersonalHash} - Avg Pool
-                  H/s: {avgPoolHash}</CardTitle>
+                <CardTitle>Last 12h rewards - Avg Personal <br/>
+                  H/s: {avgPersonalHash} on {personalSubmissionsCount} submissions - Avg Pool
+                  H/s: {avgPoolHash} on {poolSubmissionsCount} submissions</CardTitle>
               </CardHeader>
               <CardContent>
                 <ChallengeEarningsTable data={challengeEarnings}/>

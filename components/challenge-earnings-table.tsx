@@ -47,8 +47,8 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
           <TableHead>Difficulty</TableHead>
           <TableHead>Coal Total</TableHead>
           <TableHead>Ore Total</TableHead>
-          <TableHead>Best Hashpower</TableHead>
-          <TableHead>Best Difficulty</TableHead>
+          <TableHead>Pool Hashpower</TableHead>
+          <TableHead>Pool Difficulty</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

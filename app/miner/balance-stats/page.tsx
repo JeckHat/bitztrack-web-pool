@@ -28,6 +28,7 @@ import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import ChallengeEarningsTable from '../../../components/challenge-earnings-table'
+import bigDecimal from 'js-big-decimal'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
@@ -45,6 +46,8 @@ export default function Page () {
   const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [challengeEarnings, setChallengeEarnings] = useState<SubmissionEarningMinerInfo[]>([])
+  const [avgPersonalHash, setAvgPersonalHash] = useState<number>(0)
+  const [avgPoolHash, setAvgPoolHash] = useState<number>(0)
   const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
   const { toast } = useToast()
@@ -204,6 +207,13 @@ export default function Page () {
       const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionTwentyFourHoursAgo, submissionNow)
       console.log('earnings -->', earnings)
       setChallengeEarnings(earnings)
+
+      // calculate the avg personal and pool hash
+      const totalPersonalHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.minerHashpower)), 0)
+      setAvgPersonalHash(Math.round(parseFloat(bigDecimal.divide(totalPersonalHash, earnings.length))))
+      const totalPoolHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.bestChallengeHashpower)), 0)
+      setAvgPoolHash(Math.round(parseFloat(bigDecimal.divide(totalPoolHash, earnings.length))))
+
       const now = Date.now()
       setLastFetchTime(now)
       localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
@@ -359,7 +369,8 @@ export default function Page () {
           {publicKey && (
             <Card>
               <CardHeader>
-                <CardTitle>Last 12h rewards</CardTitle>
+                <CardTitle>Last 12h rewards - Avg Personal H/s: {avgPersonalHash} - Avg Pool
+                  H/s: {avgPoolHash}</CardTitle>
               </CardHeader>
               <CardContent>
                 <ChallengeEarningsTable data={challengeEarnings}/>

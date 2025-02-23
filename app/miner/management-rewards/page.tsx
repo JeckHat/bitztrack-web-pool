@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui
 import { useToast } from '../../../hooks/use-toast'
 import { getMinerRewards, getPoolStakeAndMultipliers, getTokenBalance } from '../../../lib/poolUtils'
 import { RefreshCw } from 'lucide-react'
-import { MinerBalanceString, StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
+import { FullMinerBalanceString, StakeAndMultipliersString } from '../../../pages/api/apiDataTypes'
 import { claimRewards, MINIMUM_CLAIM_AMOUNT_COAL, MINIMUM_CLAIM_AMOUNT_ORE } from '../../../lib/claimRewards'
 import Link from 'next/link'
 
@@ -29,7 +29,7 @@ export default function StakingPage () {
   const [poolStakeAndMultipliers, setPoolStakeAndMultipliers] = useState<StakeAndMultipliersString | null>(null)
   const [selectedTab, setSelectedTab] = useState('miner')
   const [isClaiming, setIsClaiming] = useState(false)
-  const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
+  const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
   const [lastRefreshTime, setLastRefreshTime] = useState<number | null>(null)
   const [cooldownRemaining, setCooldownRemaining] = useState(0)
 
@@ -66,7 +66,14 @@ export default function StakingPage () {
     const [userBalanceCoal, poolStakeData, minerRewards] = await Promise.all([
       (wallet.publicKey ? getTokenBalance(wallet.publicKey, COAL_MINT_ADDRESS) : 0),
       getPoolStakeAndMultipliers(),
-      (wallet.publicKey ? getMinerRewards(wallet.publicKey.toString()) : { coal: '0', ore: '0', chromium: '0' }),
+      (wallet.publicKey ? getMinerRewards(wallet.publicKey.toString()) : {
+        coal: '0',
+        ore: '0',
+        chromium: '0',
+        sol: '0',
+        ingot: '0',
+        wood: '0'
+      }),
     ])
 
     setBalanceCoal(parseFloat(userBalanceCoal.toFixed(COAL_TOKEN_DECIMALS)))

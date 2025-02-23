@@ -19,7 +19,6 @@ import {
 import {
   DiamondHandsMultiplier,
   FullMinerBalanceString,
-  MinerBalanceString,
   ReprocessInfoWithDate,
   SubmissionEarningMinerInfo,
   SubmissionWithDate
@@ -35,7 +34,7 @@ const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 export default function Page () {
   const router = useRouter()
   const [publicKey, setPublicKey] = useState('')
-  const [minerRewards, setMinerRewards] = useState<MinerBalanceString | null>(null)
+  const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
   const [minerRewardsReprocessChromium, setMinerRewardsReprocessChromium] = useState<FullMinerBalanceString | null>(null)
   const [minerRewardsDiamondHands, setMinerRewardsDiamondHands] = useState<FullMinerBalanceString | null>(null)
   const [minerDiamondHandsMultiplier, setMinerDiamondHandsMultiplier] = useState<DiamondHandsMultiplier>({
@@ -215,10 +214,18 @@ export default function Page () {
 
       // calculate the avg personal and pool hash
       const totalPersonalHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.minerHashpower)), 0)
-      setAvgPersonalHash(Math.round(parseFloat(bigDecimal.divide(totalPersonalHash, earnings.length))))
+      if (earnings.length > 0) {
+        setAvgPersonalHash(Math.round(parseFloat(bigDecimal.divide(totalPersonalHash, earnings.length))))
+      } else {
+        setAvgPersonalHash(0)
+      }
       setPersonalSubmissionsCount(earnings.length)
       const totalPoolHash = earnings.reduce((acc, entry) => parseFloat(bigDecimal.add(acc, entry.bestChallengeHashpower)), 0)
-      setAvgPoolHash(Math.round(parseFloat(bigDecimal.divide(totalPoolHash, earnings.length))))
+      if (earnings.length > 0) {
+        setAvgPoolHash(Math.round(parseFloat(bigDecimal.divide(totalPoolHash, earnings.length))))
+      } else {
+        setAvgPoolHash(0)
+      }
 
       const now = Date.now()
       setLastFetchTime(now)
@@ -305,6 +312,8 @@ export default function Page () {
                 <p>Coal: {minerRewards.coal}</p>
                 <p>Ore: {minerRewards.ore}</p>
                 <p>Chromium: {minerRewards.chromium}</p>
+                <p>Ingot: {minerRewards.ingot}</p>
+                <p>Wood: {minerRewards.wood}</p>
               </CardContent>
             </Card>
           )}

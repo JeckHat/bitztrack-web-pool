@@ -8,8 +8,6 @@ import {
   DiamondHandsMultiplier,
   FullMinerBalance,
   FullMinerBalanceString,
-  MinerBalance,
-  MinerBalanceString,
   ReprocessInfo,
   ReprocessInfoWithDate,
   StakeAndMultipliers,
@@ -152,12 +150,12 @@ export async function getPoolStakeAndMultipliers (): Promise<StakeAndMultipliers
   }
 }
 
-export async function getMinerRewardsNumeric (publicKey: string): Promise<MinerBalance> {
+export async function getMinerRewardsNumeric (publicKey: string): Promise<FullMinerBalance> {
   try {
-    const response = await axios.get<MinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
+    const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
     return response.data
   } catch {
-    return { coal: 0, ore: 0, chromium: 0 }
+    return { coal: 0, ore: 0, chromium: 0, ingot: 0, wood: 0, sol: 0 }
   }
 }
 
@@ -179,12 +177,15 @@ export async function getMinerGuildStakeRewards24h (publicKey: string): Promise<
   }
 }
 
-export async function getMinerRewards (publicKey: string): Promise<MinerBalanceString> {
+export async function getMinerRewards (publicKey: string): Promise<FullMinerBalanceString> {
   const response = await getMinerRewardsNumeric(publicKey)
   return {
     coal: response.coal?.toString() ?? '-',
     ore: response.ore?.toString() ?? '-',
     chromium: response.chromium?.toString() ?? '-',
+    ingot: response.ingot?.toString() ?? '-',
+    wood: response.wood?.toString() ?? '-',
+    sol: response.sol?.toString() ?? '-',
   }
 }
 

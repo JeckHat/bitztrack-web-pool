@@ -28,10 +28,30 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
 import ChallengeEarningsTable from '../../../components/challenge-earnings-table'
 import bigDecimal from 'js-big-decimal'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function Page () {
+  const submissionTimeWindoow = [
+    {
+      label: 'Last 1h',
+      value: 1
+    },
+    {
+      label: 'Last 6h',
+      value: 6
+    },
+    {
+      label: 'Last 12h',
+      value: 12
+    },
+    {
+      label: 'Last 24h',
+      value: 24
+    }
+  ]
+
   const router = useRouter()
   const [publicKey, setPublicKey] = useState('')
   const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
@@ -159,8 +179,6 @@ export default function Page () {
 
       updateRecentAddresses(publicKeyToUse)
 
-      getChallengeEarnings(publicKeyToUse)
-
       toast({
         title: 'Data Fetched',
         description: 'Miner stats have been updated.',
@@ -177,21 +195,23 @@ export default function Page () {
     setLoadingRewards(false)
   }
 
-  const getChallengeEarnings = async (key?: string) => {
+  const getChallengeEarnings = async (time: number | string, key?: string) => {
+    let targetTime = 0
+    if (typeof time === 'string') {
+      targetTime = parseInt(time, 10)
+    } else {
+      targetTime = time
+    }
+    setChallengeEarnings([])
+    setPoolSubmissionsCount(0)
+    setPersonalSubmissionsCount(0)
+    setAvgPersonalHash(0)
+    setAvgPoolHash(0)
     const publicKeyToUse = key || publicKey
     if (!publicKeyToUse) {
       toast({
         title: 'Error',
         description: 'Please enter a public key',
-        variant: 'destructive',
-      })
-      return
-    }
-
-    if (cooldownRemaining > 0) {
-      toast({
-        title: 'Cooldown Active',
-        description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
         variant: 'destructive',
       })
       return
@@ -203,7 +223,7 @@ export default function Page () {
 
     try {
       const submissionNow = new Date()
-      const submissionTwentyFourHoursAgo = new Date(submissionNow.getTime() - 12 * 60 * 60 * 1000)
+      const submissionTwentyFourHoursAgo = new Date(submissionNow.getTime() - targetTime * 60 * 60 * 1000)
 
       const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionTwentyFourHoursAgo, submissionNow)
       console.log('earnings -->', earnings)
@@ -362,18 +382,6 @@ export default function Page () {
           )}
         </TabsContent>
         <TabsContent value="submissions">
-          {(loadingSubmissions || loadingRewards) && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <div className="flex flex-row gap-2 items-center">
-                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                    <span>Loading...</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          )}
           {!publicKey && (
             <Card>
               <CardHeader>
@@ -381,18 +389,32 @@ export default function Page () {
               </CardHeader>
             </Card>
           )}
-          {challengeEarnings.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Last 12h rewards - Avg Personal <br/>
-                  H/s: {avgPersonalHash} on {personalSubmissionsCount} submissions - Avg Pool
-                  H/s: {avgPoolHash} on {poolSubmissionsCount} submissions</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChallengeEarningsTable data={challengeEarnings}/>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <Select disabled={loadingSubmissions} onValueChange={getChallengeEarnings}>
+                  <SelectTrigger className="w-1/2 mb-2">
+                    <SelectValue placeholder="Submission time"/>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {submissionTimeWindoow.map(({ label, value }) => (
+                      <SelectItem key={value} value={value.toString()}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                Avg Personal H/s: {avgPersonalHash} on {personalSubmissionsCount} submissions <br/>
+                Avg Pool H/s: {avgPoolHash} on {poolSubmissionsCount} submissions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ChallengeEarningsTable data={challengeEarnings}/>
+              {loadingSubmissions && (
+                <div className="flex flex-row gap-2 items-center mt-4 ml-4">
+                  <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                  <span>Loading...</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

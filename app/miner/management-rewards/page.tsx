@@ -268,12 +268,13 @@ export default function StakingPage () {
                   </li>
                 </ul>
               </div>
-              <p>COAL: {minerRewards?.coal ?? '0'}</p>
-              <p>ORE: {minerRewards?.ore ?? '0'}</p>
-              <p>CHROMIUM: {minerRewards?.chromium ?? '0'}</p>
+              <p>COAL: {minerRewards?.coal?.toLocaleString() ?? '0'}</p>
+              <p>ORE: {minerRewards?.ore?.toLocaleString() ?? '0'}</p>
+              <p>CHROMIUM: {minerRewards?.chromium?.toLocaleString() ?? '0'}</p>
               {!meetsMinimumRequirements() && (
                 <p className="text-red-500 mt-2">
-                  Minimum withdrawal: {MINIMUM_CLAIM_AMOUNT_COAL} COAL or {MINIMUM_CLAIM_AMOUNT_ORE} ORE. Your current
+                  Minimum withdrawal: {MINIMUM_CLAIM_AMOUNT_COAL.toLocaleString()} COAL
+                  or {MINIMUM_CLAIM_AMOUNT_ORE.toLocaleString()} ORE. Your current
                   rewards do not meet this minimum.
                 </p>
               )}
@@ -327,8 +328,8 @@ export default function StakingPage () {
                     Stake to the Pool
                     </span>
                     <span>
-                    Multiplier: {poolStakeAndMultipliers?.coal_multiplier ?? '-'}x - Total
-                    Stake: {poolStakeAndMultipliers?.coal_stake ?? '-'} COAL
+                    Multiplier: {poolStakeAndMultipliers?.coal_multiplier?.toLocaleString() ?? '-'}x - Total
+                    Stake: {poolStakeAndMultipliers?.coal_stake?.toLocaleString() ?? '-'} COAL
                     </span>
                   </div>
                   <Button
@@ -367,7 +368,7 @@ export default function StakingPage () {
               </div>
               <div className="mt-4">
                 <Label htmlFor="balanceCOAL">Available Balance:</Label>
-                <p id="balanceCOAL" className="text-lg font-semibold">{balanceCoal} COAL</p>
+                <p id="balanceCOAL" className="text-lg font-semibold">{balanceCoal.toLocaleString()} COAL</p>
               </div>
               <div>
                 <Label htmlFor="amount">Amount to Stake:</Label>

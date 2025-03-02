@@ -70,28 +70,28 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
                 </TableCell>
                 <TableCell>{challengeId}</TableCell>
                 <TableCell>{latestDate.toLocaleString()}</TableCell>
-                <TableCell>{totalCoal}</TableCell>
-                <TableCell>{totalOre}</TableCell>
-                <TableCell>{totalHashpower}</TableCell>
-                <TableCell>{averageDifficulty.toFixed(2)}</TableCell>
-                <TableCell>{formatLargeNumber(entries[0].totalRewardsEarnedCoal, COAL_TOKEN_DECIMALS)}</TableCell>
-                <TableCell>{formatLargeNumber(entries[0].totalRewardsEarnedOre, COAL_TOKEN_DECIMALS)}</TableCell>
-                <TableCell>{entries[0].bestChallengeHashpower}</TableCell>
-                <TableCell>{entries[0].bestDifficulty}</TableCell>
+                <TableCell>{totalCoal.toLocaleString()}</TableCell>
+                <TableCell>{totalOre.toLocaleString()}</TableCell>
+                <TableCell>{totalHashpower.toLocaleString()}</TableCell>
+                <TableCell>{averageDifficulty.toFixed(2).toLocaleString()}</TableCell>
+                <TableCell>{formatLargeNumber(entries[0].totalRewardsEarnedCoal, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                <TableCell>{formatLargeNumber(entries[0].totalRewardsEarnedOre, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                <TableCell>{entries[0].bestChallengeHashpower.toLocaleString()}</TableCell>
+                <TableCell>{entries[0].bestDifficulty.toLocaleString()}</TableCell>
               </TableRow>
               {isExpanded && entries.map((entry, index) => (
                 <TableRow key={index}>
                   <TableCell></TableCell>
                   <TableCell>{entry.challengeId}</TableCell>
                   <TableCell>{entry.createdAt.toLocaleString()}</TableCell>
-                  <TableCell>{formatLargeNumber(entry.minerAmountCoal, COAL_TOKEN_DECIMALS)}</TableCell>
-                  <TableCell>{formatLargeNumber(entry.minerAmountOre, COAL_TOKEN_DECIMALS)}</TableCell>
-                  <TableCell>{entry.minerHashpower}</TableCell>
-                  <TableCell>{entry.minerDifficulty}</TableCell>
-                  <TableCell>{formatLargeNumber(entry.totalRewardsEarnedCoal, COAL_TOKEN_DECIMALS)}</TableCell>
-                  <TableCell>{formatLargeNumber(entry.totalRewardsEarnedOre, COAL_TOKEN_DECIMALS)}</TableCell>
-                  <TableCell>{entry.bestChallengeHashpower}</TableCell>
-                  <TableCell>{entry.bestDifficulty}</TableCell>
+                  <TableCell>{formatLargeNumber(entry.minerAmountCoal, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                  <TableCell>{formatLargeNumber(entry.minerAmountOre, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                  <TableCell>{entry.minerHashpower.toLocaleString()}</TableCell>
+                  <TableCell>{entry.minerDifficulty.toLocaleString()}</TableCell>
+                  <TableCell>{formatLargeNumber(entry.totalRewardsEarnedCoal, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                  <TableCell>{formatLargeNumber(entry.totalRewardsEarnedOre, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
+                  <TableCell>{entry.bestChallengeHashpower.toLocaleString()}</TableCell>
+                  <TableCell>{entry.bestDifficulty.toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </React.Fragment>

@@ -66,9 +66,8 @@ const data: MenuData[] = [
     icon: InfoIcon,
     items: [
       {
-        title: 'Pool stats - WIP',
-        // url: "/info/stats",
-        url: '/work-in-progress',
+        title: 'Pool stats',
+        url: '/info/stats',
       },
       {
         title: 'Pool details',

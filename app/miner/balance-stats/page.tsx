@@ -11,10 +11,12 @@ import {
   getLastChromiumReprocessingEarning,
   getLastDiamondHandsReprocessingEarning,
   getLastMinerSubmission,
+  getLastOMCReprocessingEarning,
   getMinerEarningsSubmissions,
   getMinerRewards,
   getPoolChromiumReprocessingInfo,
-  getPoolDiamondHandsReprocessingInfo
+  getPoolDiamondHandsReprocessingInfo,
+  getPoolOMCReprocessingInfo
 } from '@/lib/poolUtils'
 import {
   DiamondHandsMultiplier,
@@ -57,6 +59,7 @@ export default function Page () {
   const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
   const [minerRewardsReprocessChromium, setMinerRewardsReprocessChromium] = useState<FullMinerBalanceString | null>(null)
   const [minerRewardsDiamondHands, setMinerRewardsDiamondHands] = useState<FullMinerBalanceString | null>(null)
+  const [minerRewardsOMC, setMinerRewardsOMC] = useState<FullMinerBalanceString | null>(null)
   const [minerDiamondHandsMultiplier, setMinerDiamondHandsMultiplier] = useState<DiamondHandsMultiplier>({
     lastClaim: null,
     multiplier: 0
@@ -64,6 +67,7 @@ export default function Page () {
   const [lastSubmission, setLastSubmission] = useState<SubmissionWithDate | null>(null)
   const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
+  const [OMCDatesInfo, setOMCDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
   const [challengeEarnings, setChallengeEarnings] = useState<SubmissionEarningMinerInfo[]>([])
   const [avgPersonalHash, setAvgPersonalHash] = useState<number>(0)
   const [personalSubmissionsCount, setPersonalSubmissionsCount] = useState<number>(0)
@@ -155,14 +159,16 @@ export default function Page () {
     setLoadingRewards(true)
 
     try {
-      const [rewards, submission, chromiumInfo, diamondHandsInfo, chromiumEarning, diamondHandsEarning, diamondHandsMultiplier] = await Promise.all([
+      const [rewards, submission, chromiumInfo, chromiumEarning, diamondHandsInfo, diamondHandsEarning, diamondHandsMultiplier, OMCInfo, OMCEarning] = await Promise.all([
         getMinerRewards(publicKeyToUse),
         getLastMinerSubmission(publicKeyToUse),
         getPoolChromiumReprocessingInfo(),
-        getPoolDiamondHandsReprocessingInfo(),
         getLastChromiumReprocessingEarning(publicKeyToUse),
+        getPoolDiamondHandsReprocessingInfo(),
         getLastDiamondHandsReprocessingEarning(publicKeyToUse),
-        getDiamondHandsMultiplier(publicKeyToUse)
+        getDiamondHandsMultiplier(publicKeyToUse),
+        getPoolOMCReprocessingInfo(),
+        getLastOMCReprocessingEarning(publicKeyToUse),
       ])
 
       setMinerRewards(rewards)
@@ -172,6 +178,8 @@ export default function Page () {
       setMinerRewardsReprocessChromium(chromiumEarning)
       setMinerRewardsDiamondHands(diamondHandsEarning)
       setMinerDiamondHandsMultiplier(diamondHandsMultiplier)
+      setOMCDatesInfo(OMCInfo)
+      setMinerRewardsOMC(OMCEarning)
 
       const now = Date.now()
       setLastFetchTime(now)
@@ -223,9 +231,9 @@ export default function Page () {
 
     try {
       const submissionNow = new Date()
-      const submissionTwentyFourHoursAgo = new Date(submissionNow.getTime() - targetTime * 60 * 60 * 1000)
+      const submissionHoursAgo = new Date(submissionNow.getTime() - targetTime * 60 * 60 * 1000)
 
-      const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionTwentyFourHoursAgo, submissionNow)
+      const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionHoursAgo, submissionNow)
       console.log('earnings -->', earnings)
       setChallengeEarnings(earnings)
 
@@ -329,11 +337,11 @@ export default function Page () {
                 <CardTitle>Miner Rewards</CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Coal: {minerRewards.coal}</p>
-                <p>Ore: {minerRewards.ore}</p>
-                <p>Chromium: {minerRewards.chromium}</p>
-                <p>Ingot: {minerRewards.ingot}</p>
-                <p>Wood: {minerRewards.wood}</p>
+                <p>Coal: {minerRewards.coal.toLocaleString()}</p>
+                <p>Ore: {minerRewards.ore.toLocaleString()}</p>
+                <p>Chromium: {minerRewards.chromium.toLocaleString()}</p>
+                <p>Ingot: {minerRewards.ingot.toLocaleString()}</p>
+                <p>Wood: {minerRewards.wood.toLocaleString()}</p>
               </CardContent>
             </Card>
           )}
@@ -380,6 +388,21 @@ export default function Page () {
               </CardContent>
             </Card>
           )}
+          {OMCDatesInfo && (
+            <Card>
+              <CardHeader>
+                <CardTitle>OMC NFT Reprocess Info</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p>Last Reprocess: {OMCDatesInfo.last_reprocess.toLocaleString()}</p>
+                <p>Main rewards: {minerRewardsOMC?.coal ?? '-'} COAL
+                  - {minerRewardsOMC?.ore ?? '-'} ORE</p>
+                <p>Extra rewards: {minerRewardsOMC?.ingot ?? '-'} INGOT
+                  - {minerRewardsOMC?.wood ?? '-'} WOOD</p>
+                <p>Next Reprocess: {OMCDatesInfo.next_reprocess.toLocaleString()}</p>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         <TabsContent value="submissions">
           {!publicKey && (
@@ -402,8 +425,10 @@ export default function Page () {
                     ))}
                   </SelectContent>
                 </Select>
-                Avg Personal H/s: {avgPersonalHash} on {personalSubmissionsCount} submissions <br/>
-                Avg Pool H/s: {avgPoolHash} on {poolSubmissionsCount} submissions</CardTitle>
+                Avg Personal
+                H/s: {avgPersonalHash.toLocaleString()} on {personalSubmissionsCount.toLocaleString()} submissions <br/>
+                Avg Pool
+                H/s: {avgPoolHash.toLocaleString()} on {poolSubmissionsCount.toLocaleString()} submissions</CardTitle>
             </CardHeader>
             <CardContent>
               <ChallengeEarningsTable data={challengeEarnings}/>

@@ -306,12 +306,12 @@ export default function Page () {
                 balance in the <Link href="/miner/management-rewards"
                                      className="underline text-blue-500 hover:text-blue-700">Management Page</Link>
               </p>
-              <p>LP Staked: {lpBalance.staked || '0'}</p>
-              <p>Estimated Miner Daily Return: {guildRewards.guildRewards24h || '0'}</p>
-              <p>Total Miner COAL Rewards: {guildRewards.guildRewards || '0'}</p>
-              <p>Avg. COAL Rewards for 1LP 24h: {avgGuildRewards?.last_24h ?? '-'} -
-                7d: {avgGuildRewards?.last_7d ?? '-'} -
-                30d {avgGuildRewards?.last_30d ?? '-'}</p>
+              <p>LP Staked: {lpBalance.staked.toLocaleString() || '0'}</p>
+              <p>Estimated Miner Daily Return: {guildRewards.guildRewards24h.toLocaleString() || '0'}</p>
+              <p>Total Miner COAL Rewards: {guildRewards.guildRewards.toLocaleString() || '0'}</p>
+              <p>Avg. COAL Rewards for 1LP 24h: {avgGuildRewards?.last_24h?.toLocaleString() ?? '-'} -
+                7d: {avgGuildRewards?.last_7d?.toLocaleString() ?? '-'} -
+                30d {avgGuildRewards?.last_30d?.toLocaleString() ?? '-'}</p>
             </CardContent>
             <CardFooter>
               <div className="flex flex-col">
@@ -338,8 +338,8 @@ export default function Page () {
                     Stake to the Guild
                     </span>
                     <span>
-                    Multiplier: {poolStakeAndMultipliers?.guild_multiplier ?? '-'}x - Total
-                    Stake: {poolStakeAndMultipliers?.guild_stake ?? '-'} COAL-SOL
+                    Multiplier: {poolStakeAndMultipliers?.guild_multiplier?.toLocaleString() ?? '-'}x - Total
+                    Stake: {poolStakeAndMultipliers?.guild_stake?.toLocaleString() ?? '-'} COAL-SOL
                     </span>
                   </div>
                   <Button
@@ -463,8 +463,8 @@ export default function Page () {
                   </li>
                 </ul>
               </div>
-              <p>LP Staked: {lpBalance.staked}</p>
-              <p>LP in Wallet: {lpBalance.wallet}</p>
+              <p>LP Staked: {lpBalance.staked.toLocaleString()}</p>
+              <p>LP in Wallet: {lpBalance.wallet.toLocaleString()}</p>
               <Input
                 type="number"
                 placeholder="Amount to unstake"

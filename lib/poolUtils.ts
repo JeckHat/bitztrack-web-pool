@@ -5,6 +5,7 @@ import {
   AvgGuildRewards,
   BalanceData,
   BlockhashData,
+  ChallengeWithDifficulty,
   DiamondHandsMultiplier,
   FullMinerBalance,
   FullMinerBalanceString,
@@ -305,6 +306,28 @@ export async function getPoolDiamondHandsReprocessingInfo (): Promise<ReprocessI
   }
 }
 
+export async function getPoolOMCReprocessingInfo (): Promise<ReprocessInfoWithDate> {
+  try {
+    const cacheKey = `getPoolOMCReprocessingInfo`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
+      targetCall = axios.get<ReprocessInfo>(`${POOL_SERVER}/pool/reprocess/omc-info`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
+    return {
+      last_reprocess: parseISO(response.data.last_reprocess + '.000Z'),
+      next_reprocess: parseISO(response.data.next_reprocess + '.000Z'),
+    }
+  } catch {
+    return {
+      last_reprocess: new Date(),
+      next_reprocess: new Date(),
+    }
+  }
+}
+
 export async function getLastChromiumReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
   try {
     const cacheKey = `getLastChromiumReprocessingEarning-${publicKey}`
@@ -340,6 +363,36 @@ export async function getLastDiamondHandsReprocessingEarning (publicKey: string)
     const cacheKey = `getLastDiamondHandsReprocessingEarning-${publicKey}`
     let targetCall = requestCache.get(cacheKey)
     if (!targetCall) {
+      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-omc?pubkey=${publicKey}`)
+      requestCache.set(cacheKey, targetCall)
+    }
+    const response = await targetCall
+    requestCache.delete(cacheKey)
+    return {
+      sol: response.data.sol?.toString() ?? '-',
+      coal: response.data.coal?.toString() ?? '-',
+      ore: response.data.ore?.toString() ?? '-',
+      chromium: response.data.chromium?.toString() ?? '-',
+      ingot: response.data.ingot?.toString() ?? '-',
+      wood: response.data.wood?.toString() ?? '-',
+    }
+  } catch {
+    return {
+      sol: '-',
+      coal: '-',
+      ore: '-',
+      chromium: '-',
+      ingot: '-',
+      wood: '-',
+    }
+  }
+}
+
+export async function getLastOMCReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
+  try {
+    const cacheKey = `getLastOMCReprocessingEarning-${publicKey}`
+    let targetCall = requestCache.get(cacheKey)
+    if (!targetCall) {
       targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
       requestCache.set(cacheKey, targetCall)
     }
@@ -371,6 +424,15 @@ export async function getCurrentMinersCount (): Promise<string> {
     return response.data.toString()
   } catch {
     return '-'
+  }
+}
+
+export async function getPoolChallenges (): Promise<ChallengeWithDifficulty[]> {
+  try {
+    const response = await axios.get<ChallengeWithDifficulty[]>(`${POOL_SERVER}/challenges`)
+    return response.data
+  } catch {
+    return []
   }
 }
 

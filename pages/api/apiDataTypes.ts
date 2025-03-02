@@ -99,3 +99,12 @@ export type SubmissionEarningMinerInfo = {
   totalRewardsEarnedCoal: number,
   totalRewardsEarnedOre: number
 }
+
+export type ChallengeWithDifficulty = {
+  id: number,
+  difficulty: number,
+  challenge_hashpower: number,
+  rewards_earned_coal: number,
+  rewards_earned_ore: number,
+  created_at: Date
+}

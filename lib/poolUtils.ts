@@ -363,7 +363,7 @@ export async function getLastDiamondHandsReprocessingEarning (publicKey: string)
     const cacheKey = `getLastDiamondHandsReprocessingEarning-${publicKey}`
     let targetCall = requestCache.get(cacheKey)
     if (!targetCall) {
-      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-omc?pubkey=${publicKey}`)
+      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
       requestCache.set(cacheKey, targetCall)
     }
     const response = await targetCall
@@ -393,7 +393,7 @@ export async function getLastOMCReprocessingEarning (publicKey: string): Promise
     const cacheKey = `getLastOMCReprocessingEarning-${publicKey}`
     let targetCall = requestCache.get(cacheKey)
     if (!targetCall) {
-      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
+      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-omc?pubkey=${publicKey}`)
       requestCache.set(cacheKey, targetCall)
     }
     const response = await targetCall

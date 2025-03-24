@@ -45,7 +45,7 @@ export default function Page () {
               </li>
               <li>Disconnect and restart the machine</li>
               <li>Reconnect to SSH or HiveShell</li>
-              <li>Install the COAL pool client:
+              <li>Install the Excalivator client:
                 <pre className="bg-muted p-2 rounded-md text-sm overflow-x-auto mt-2">
                   <code>cargo install excalivator-client</code>
                 </pre>

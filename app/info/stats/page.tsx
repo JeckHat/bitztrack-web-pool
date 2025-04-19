@@ -11,8 +11,8 @@ import {
 import { toast } from '../../../hooks/use-toast'
 import { COAL_TOKEN_DECIMALS } from '../../../lib/constants'
 import { DifficultyDistribution } from '../../../pages/api/apiDataTypes'
-import { ChartContainer } from '../../../components/ui/chart'
-import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '../../../components/ui/chart'
+import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts'
 
 export default function Page () {
   const [minersCount, setMinersCount] = useState('-')
@@ -157,9 +157,9 @@ export default function Page () {
         <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mb-4">
           Difficulty Distribution (24h)
         </h3>
-        <div className="w-full h-[400px]">
+        <div className="w-full h-[500px]">
           <ChartContainer
-            className="w-full h-[400px]"
+            className="w-full h-full"
             config={{
               difficulty: {
                 label: 'Difficulty Level',
@@ -177,16 +177,19 @@ export default function Page () {
                 label={{ value: 'Difficulty', position: 'insideBottomRight', offset: -10 }}
               />
               <YAxis
-                label={{ value: 'Number of Miners', angle: -90, position: 'insideLeft' }}
+                label={{ value: 'Percentage of Miners (%)', angle: -90, position: 'insideLeft' }}
               />
-              <Tooltip
-                formatter={(value) => [value, 'Miners']}
-                labelFormatter={(label) => `Difficulty: ${label}`}
+              <ChartTooltip
+                content={<ChartTooltipContent/>}
+                formatter={(value, name, entry) => {
+                  const count = entry.payload.count
+                  return [`${value.toFixed(2)}% (${count} miners)`]
+                }}
               />
               <Legend/>
               <Bar
-                dataKey="count"
-                name="Miners"
+                dataKey="percentage"
+                name="Miners (%)"
                 fill="var(--color-difficulty)"
                 radius={[4, 4, 0, 0]}
               />

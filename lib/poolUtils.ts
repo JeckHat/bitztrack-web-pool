@@ -446,6 +446,15 @@ export async function getDifficultyDistribution24 (): Promise<DifficultyDistribu
   }
 }
 
+export async function getSubmittedDifficultyDistribution24 (): Promise<DifficultyDistribution[]> {
+  try {
+    const response = await axios.get<DifficultyDistribution[]>(`${POOL_SERVER}/best-difficulty-distribution-24h`)
+    return response.data
+  } catch {
+    return []
+  }
+}
+
 export async function getPoolChallenges (): Promise<ChallengeWithDifficulty[]> {
   try {
     const response = await axios.get<ChallengeWithDifficulty[]>(`${POOL_SERVER}/challenges`)

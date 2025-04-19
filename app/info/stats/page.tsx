@@ -6,7 +6,8 @@ import {
   getAvgMinersCount24,
   getCurrentMinersCount,
   getDifficultyDistribution24,
-  getPoolChallenges
+  getPoolChallenges,
+  getSubmittedDifficultyDistribution24
 } from '../../../lib/poolUtils'
 import { toast } from '../../../hooks/use-toast'
 import { COAL_TOKEN_DECIMALS } from '../../../lib/constants'
@@ -18,6 +19,7 @@ export default function Page () {
   const [minersCount, setMinersCount] = useState('-')
   const [minersCountAvg24h, setMinersCountAvg24h] = useState('-')
   const [difficultiesDistribution, setDifficultiesDistribution] = useState<DifficultyDistribution[]>([])
+  const [submittedDifficultiesDistribution, setSubmittedDifficultiesDistribution] = useState<DifficultyDistribution[]>([])
   const [totalPoolHash, setTotalPoolHash] = useState<number>(0)
   const [avgPoolHash, setAvgPoolHash] = useState<number>(0)
   const [bestPoolDifficulty, setBestPoolDifficulty] = useState<number>(0)
@@ -52,11 +54,13 @@ export default function Page () {
 
   const getDifficultyDistribution = async () => {
     try {
-      const [difficulties] = await Promise.all([
-        getDifficultyDistribution24()
+      const [difficulties, submittedDifficulties] = await Promise.all([
+        getDifficultyDistribution24(),
+        getSubmittedDifficultyDistribution24()
       ])
 
       setDifficultiesDistribution(difficulties)
+      setSubmittedDifficultiesDistribution(submittedDifficulties)
     } catch (error) {
       console.error('Error fetching data:', error)
       toast({
@@ -155,7 +159,7 @@ export default function Page () {
       </div>
       <Card className="col-span-3 p-6">
         <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mb-4">
-          Difficulty Distribution (24h)
+          Miners Difficulty Distribution (24h)
         </h3>
         <div className="w-full h-[500px]">
           <ChartContainer
@@ -191,6 +195,50 @@ export default function Page () {
                 dataKey="percentage"
                 name="Miners (%)"
                 fill="var(--color-difficulty)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        </div>
+      </Card>
+      <Card className="col-span-3 p-6">
+        <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mb-4">
+          Pool Best Difficulties Submitted (24h)
+        </h3>
+        <div className="w-full h-[500px]">
+          <ChartContainer
+            className="w-full h-full"
+            config={{
+              difficulty: {
+                label: 'Difficulty Level',
+                color: 'hsl(var(--accent))'
+              }
+            }}
+          >
+            <BarChart
+              data={submittedDifficultiesDistribution}
+              margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+            >
+              <CartesianGrid strokeDasharray="3 3"/>
+              <XAxis
+                dataKey="difficulty"
+                label={{ value: 'Difficulty', position: 'insideBottomRight', offset: -10 }}
+              />
+              <YAxis
+                label={{ value: 'Percentage of Submissions (%)', angle: -90, position: 'insideLeft' }}
+              />
+              <ChartTooltip
+                content={<ChartTooltipContent/>}
+                formatter={(value, name, entry) => {
+                  const count = entry.payload.count
+                  return [`${parseFloat(value.toString()).toFixed(2)}% (${count} submissions)`]
+                }}
+              />
+              <Legend/>
+              <Bar
+                dataKey="percentage"
+                name="Submissions (%)"
+                fill="var(--color-accent, hsl(var(--accent)))"
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>

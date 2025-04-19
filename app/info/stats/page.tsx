@@ -183,7 +183,7 @@ export default function Page () {
                 content={<ChartTooltipContent/>}
                 formatter={(value, name, entry) => {
                   const count = entry.payload.count
-                  return [`${value.toFixed(2)}% (${count} miners)`]
+                  return [`${parseFloat(value.toString()).toFixed(2)}% (${count} miners)`]
                 }}
               />
               <Legend/>

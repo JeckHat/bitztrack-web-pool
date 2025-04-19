@@ -7,6 +7,7 @@ import {
   BlockhashData,
   ChallengeWithDifficulty,
   DiamondHandsMultiplier,
+  DifficultyDistribution,
   FullMinerBalance,
   FullMinerBalanceString,
   ReprocessInfo,
@@ -424,6 +425,24 @@ export async function getCurrentMinersCount (): Promise<string> {
     return response.data.toString()
   } catch {
     return '-'
+  }
+}
+
+export async function getAvgMinersCount24 (): Promise<string> {
+  try {
+    const response = await axios.get<number>(`${POOL_SERVER}/active-miners-24h`)
+    return response.data.toString()
+  } catch {
+    return '-'
+  }
+}
+
+export async function getDifficultyDistribution24 (): Promise<DifficultyDistribution[]> {
+  try {
+    const response = await axios.get<DifficultyDistribution[]>(`${POOL_SERVER}/difficulty-distribution-24h`)
+    return response.data
+  } catch {
+    return []
   }
 }
 

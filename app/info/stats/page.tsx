@@ -2,12 +2,22 @@
 
 import React, { useEffect, useState } from 'react'
 import { Card } from '../../../components/ui/card'
-import { getCurrentMinersCount, getPoolChallenges } from '../../../lib/poolUtils'
+import {
+  getAvgMinersCount24,
+  getCurrentMinersCount,
+  getDifficultyDistribution24,
+  getPoolChallenges
+} from '../../../lib/poolUtils'
 import { toast } from '../../../hooks/use-toast'
 import { COAL_TOKEN_DECIMALS } from '../../../lib/constants'
+import { DifficultyDistribution } from '../../../pages/api/apiDataTypes'
+import { ChartContainer } from '../../../components/ui/chart'
+import { Bar, BarChart, CartesianGrid, Legend, Tooltip, XAxis, YAxis } from 'recharts'
 
 export default function Page () {
   const [minersCount, setMinersCount] = useState('-')
+  const [minersCountAvg24h, setMinersCountAvg24h] = useState('-')
+  const [difficultiesDistribution, setDifficultiesDistribution] = useState<DifficultyDistribution[]>([])
   const [totalPoolHash, setTotalPoolHash] = useState<number>(0)
   const [avgPoolHash, setAvgPoolHash] = useState<number>(0)
   const [bestPoolDifficulty, setBestPoolDifficulty] = useState<number>(0)
@@ -17,16 +27,36 @@ export default function Page () {
 
   useEffect(() => {
     getMinersCount()
+    getDifficultyDistribution()
     getPoolData()
   }, [])
 
   const getMinersCount = async () => {
     try {
-      const [miners] = await Promise.all([
-        getCurrentMinersCount()
+      const [miners, miners4h] = await Promise.all([
+        getCurrentMinersCount(),
+        getAvgMinersCount24()
       ])
 
       setMinersCount(miners)
+      setMinersCountAvg24h(miners4h)
+    } catch (error) {
+      console.error('Error fetching data:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to fetch miner stats. Please try again.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const getDifficultyDistribution = async () => {
+    try {
+      const [difficulties] = await Promise.all([
+        getDifficultyDistribution24()
+      ])
+
+      setDifficultiesDistribution(difficulties)
     } catch (error) {
       console.error('Error fetching data:', error)
       toast({
@@ -77,12 +107,16 @@ export default function Page () {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+      <div className="grid auto-rows-min gap-4 md:grid-cols-4">
         <Card
           className="aspect-video flex flex-col justify-center items-center group">
           <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400">Active Miners</h3>
           <p className="text-center text-lg mt-2">
             <strong>{minersCount.toLocaleString()}</strong>
+          </p>
+          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mt-2">AVG Miners 24h</h3>
+          <p className="text-center text-lg mt-2">
+            <strong>{minersCountAvg24h.toLocaleString()}</strong>
           </p>
         </Card>
         <Card
@@ -91,7 +125,7 @@ export default function Page () {
           <p className="text-center text-lg mt-2">
             <strong>{totalPoolHash.toLocaleString()}</strong>
           </p>
-          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400">AVG Hash/s 24h</h3>
+          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mt-2">AVG Hash/s 24h</h3>
           <p className="text-center text-lg mt-2">
             <strong>{avgPoolHash.toLocaleString()}</strong>
           </p>
@@ -102,7 +136,7 @@ export default function Page () {
           <p className="text-center text-lg mt-2">
             <strong>{bestPoolDifficulty.toLocaleString()}</strong>
           </p>
-          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400">AVG Difficulty 24h</h3>
+          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mt-2">AVG Difficulty 24h</h3>
           <p className="text-center text-lg mt-2">
             <strong>{avgPoolDifficulty.toLocaleString()}</strong>
           </p>
@@ -113,12 +147,53 @@ export default function Page () {
           <p className="text-center text-lg mt-2">
             <strong>{coalEarnings.toLocaleString()}</strong>
           </p>
-          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400">ORE Earned 24h</h3>
+          <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mt-2">ORE Earned 24h</h3>
           <p className="text-center text-lg mt-2">
             <strong>{oreEarnings.toLocaleString()}</strong>
           </p>
         </Card>
       </div>
+      <Card className="col-span-3 p-6">
+        <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mb-4">
+          Difficulty Distribution (24h)
+        </h3>
+        <div className="w-full h-[400px]">
+          <ChartContainer
+            className="w-full h-[400px]"
+            config={{
+              difficulty: {
+                label: 'Difficulty Level',
+                color: 'hsl(var(--primary))'
+              }
+            }}
+          >
+            <BarChart
+              data={difficultiesDistribution}
+              margin={{ top: 20, right: 30, left: 20, bottom: 50 }}
+            >
+              <CartesianGrid strokeDasharray="3 3"/>
+              <XAxis
+                dataKey="difficulty"
+                label={{ value: 'Difficulty', position: 'insideBottomRight', offset: -10 }}
+              />
+              <YAxis
+                label={{ value: 'Number of Miners', angle: -90, position: 'insideLeft' }}
+              />
+              <Tooltip
+                formatter={(value) => [value, 'Miners']}
+                labelFormatter={(label) => `Difficulty: ${label}`}
+              />
+              <Legend/>
+              <Bar
+                dataKey="count"
+                name="Miners"
+                fill="var(--color-difficulty)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ChartContainer>
+        </div>
+      </Card>
     </div>
   )
 }

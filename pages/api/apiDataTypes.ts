@@ -108,3 +108,9 @@ export type ChallengeWithDifficulty = {
   rewards_earned_ore: number,
   created_at: Date
 }
+
+export type DifficultyDistribution = {
+  difficulty: number,
+  count: number,
+  percentage: number,
+}

@@ -159,7 +159,7 @@ export default function Page () {
       </div>
       <Card className="col-span-3 p-6">
         <h3 className="text-xl font-bold text-center text-gray-600 dark:text-gray-400 mb-4">
-          Miners Difficulty Distribution (24h)
+          Submissions Difficulty Distribution (24h)
         </h3>
         <div className="w-full h-[500px]">
           <ChartContainer
@@ -181,19 +181,19 @@ export default function Page () {
                 label={{ value: 'Difficulty', position: 'insideBottomRight', offset: -10 }}
               />
               <YAxis
-                label={{ value: 'Percentage of Miners (%)', angle: -90, position: 'insideLeft' }}
+                label={{ value: 'Percentage of Submissions (%)', angle: -90, position: 'insideLeft' }}
               />
               <ChartTooltip
                 content={<ChartTooltipContent/>}
                 formatter={(value, name, entry) => {
                   const count = entry.payload.count
-                  return [`${parseFloat(value.toString()).toFixed(2)}% (${count} miners)`]
+                  return [`${parseFloat(value.toString()).toFixed(2)}% (${count} submissions)`]
                 }}
               />
               <Legend/>
               <Bar
                 dataKey="percentage"
-                name="Miners (%)"
+                name="Submissions (%)"
                 fill="var(--color-difficulty)"
                 radius={[4, 4, 0, 0]}
               />

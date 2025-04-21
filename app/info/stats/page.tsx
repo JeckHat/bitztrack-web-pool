@@ -234,7 +234,7 @@ export default function Page () {
               <Bar
                 dataKey="percentage"
                 name="Submissions (%)"
-                fill="var(--color-accent, hsl(var(--accent)))"
+                fill="var(--color-difficulty)"
                 radius={[4, 4, 0, 0]}
               />
             </BarChart>

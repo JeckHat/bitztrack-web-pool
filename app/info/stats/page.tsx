@@ -35,13 +35,11 @@ export default function Page () {
 
   const getMinersCount = async () => {
     try {
-      const [miners, miners4h] = await Promise.all([
-        getCurrentMinersCount(),
-        getAvgMinersCount24()
-      ])
+      const miners = await getCurrentMinersCount()
+      const miners24h = await getAvgMinersCount24()
 
       setMinersCount(miners)
-      setMinersCountAvg24h(miners4h)
+      setMinersCountAvg24h(miners24h)
     } catch (error) {
       console.error('Error fetching data:', error)
       toast({
@@ -54,10 +52,8 @@ export default function Page () {
 
   const getDifficultyDistribution = async () => {
     try {
-      const [difficulties, submittedDifficulties] = await Promise.all([
-        getDifficultyDistribution24(),
-        getSubmittedDifficultyDistribution24()
-      ])
+      const difficulties = await getDifficultyDistribution24()
+      const submittedDifficulties = await getSubmittedDifficultyDistribution24()
 
       setDifficultiesDistribution(difficulties)
       setSubmittedDifficultiesDistribution(submittedDifficulties)

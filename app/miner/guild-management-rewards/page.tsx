@@ -310,8 +310,7 @@ export default function Page () {
               <p>Estimated Miner Daily Return: {guildRewards.guildRewards24h.toLocaleString() || '0'}</p>
               <p>Total Miner COAL Rewards: {guildRewards.guildRewards.toLocaleString() || '0'}</p>
               <p>Avg. COAL Rewards for 1LP 24h: {avgGuildRewards?.last_24h?.toLocaleString() ?? '-'} -
-                7d: {avgGuildRewards?.last_7d?.toLocaleString() ?? '-'} -
-                30d {avgGuildRewards?.last_30d?.toLocaleString() ?? '-'}</p>
+                7d: {avgGuildRewards?.last_7d?.toLocaleString() ?? '-'}</p>
             </CardContent>
             <CardFooter>
               <div className="flex flex-col">

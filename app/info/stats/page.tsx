@@ -207,7 +207,7 @@ export default function Page () {
             config={{
               difficulty: {
                 label: 'Difficulty Level',
-                color: 'hsl(var(--accent))'
+                color: 'hsl(var(--primary))'
               }
             }}
           >

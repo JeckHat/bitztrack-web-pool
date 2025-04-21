@@ -46,10 +46,10 @@ const data: MenuData[] = [
         title: 'Quick start',
         url: '/getting-started/quick-start',
       },
-      {
+      /*{
         title: 'Advanced mining',
         url: '/getting-started/advanced-mining',
-      },
+      },*/
       {
         title: 'HiveOS mining',
         url: '/getting-started/hiveos-mining',

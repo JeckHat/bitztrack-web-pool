@@ -570,11 +570,11 @@ export default function WebMiner () {
             <li>To get the best results check out the <Link href="/getting-started/quick-start"
                                                             target="_blank"
                                                             className="underline text-blue-500 hover:text-blue-700">
-              CLI Installation guide
-            </Link> or the <Link href="/getting-started/advanced-mining"
-                                 target="_blank"
-                                 className="underline text-blue-500 hover:text-blue-700">
-              Orion Client Installation guide
+              Software Installation guide
+            </Link> with the <Link href="/getting-started/quick-start"
+                                   target="_blank"
+                                   className="underline text-blue-500 hover:text-blue-700">
+              Orion Client
             </Link></li>
             <li>The browser may throttled this page if left in the background</li>
           </ul>

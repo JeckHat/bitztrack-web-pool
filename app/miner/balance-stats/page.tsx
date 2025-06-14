@@ -7,16 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RefreshCw } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import {
-  getDiamondHandsMultiplier,
-  getLastChromiumReprocessingEarning,
-  getLastDiamondHandsReprocessingEarning,
-  getLastMinerSubmission,
-  getLastOMCReprocessingEarning,
   getMinerEarningsSubmissions,
-  getMinerRewards,
-  getPoolChromiumReprocessingInfo,
-  getPoolDiamondHandsReprocessingInfo,
-  getPoolOMCReprocessingInfo
 } from '@/lib/poolUtils'
 import {
   DiamondHandsMultiplier,
@@ -26,34 +17,14 @@ import {
   SubmissionWithDate
 } from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
-import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../components/ui/tabs'
+import { Popover, PopoverTrigger } from '../../../components/ui/popover'
+import { Tabs, TabsContent } from '../../../components/ui/tabs'
 import ChallengeEarningsTable from '../../../components/challenge-earnings-table'
 import bigDecimal from 'js-big-decimal'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select'
 
 const COOLDOWN_DURATION = 60000 // 1 minute in milliseconds
 
 export default function Page () {
-  const submissionTimeWindoow = [
-    {
-      label: 'Last 1h',
-      value: 1
-    },
-    {
-      label: 'Last 6h',
-      value: 6
-    },
-    {
-      label: 'Last 12h',
-      value: 12
-    },
-    {
-      label: 'Last 24h',
-      value: 24
-    }
-  ]
-
   const router = useRouter()
   const [publicKey, setPublicKey] = useState('')
   const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
@@ -99,41 +70,6 @@ export default function Page () {
     }
   }, [])
 
-  const updateRecentAddresses = (address: string) => {
-    const storedAddresses: {
-      value: string;
-      label: string
-    }[] = JSON.parse(localStorage.getItem('recentAddresses') || '[]')
-    const updatedAddresses: { value: string; label: string }[] = [{
-      label: address,
-      value: address
-    }, ...storedAddresses.filter((a) => a.value !== address)]
-    localStorage.setItem('recentAddresses', JSON.stringify(updatedAddresses))
-    setSuggestions(updatedAddresses)
-  }
-
-  useEffect(() => {
-    const storedLastFetchTime = localStorage.getItem('lastBalanceStatsFetchTime')
-    if (storedLastFetchTime) {
-      setLastFetchTime(parseInt(storedLastFetchTime, 10))
-    }
-  }, [])
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (lastFetchTime) {
-        const elapsed = Date.now() - lastFetchTime
-        if (elapsed < COOLDOWN_DURATION) {
-          setCooldownRemaining(Math.ceil((COOLDOWN_DURATION - elapsed) / 1000))
-        } else {
-          setCooldownRemaining(0)
-        }
-      }
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [lastFetchTime])
-
   const fetchData = async (key?: string) => {
     const publicKeyToUse = key || publicKey
     if (!publicKeyToUse) {
@@ -144,72 +80,9 @@ export default function Page () {
       })
       return
     }
-
-    if (cooldownRemaining > 0) {
-      toast({
-        title: 'Cooldown Active',
-        description: `Please wait ${cooldownRemaining} seconds before fetching again.`,
-        variant: 'destructive',
-      })
-      return
-    }
-
-    router.push(`?key=${publicKeyToUse}`, { scroll: false })
-
-    setLoadingRewards(true)
-
-    try {
-      const [rewards, submission, chromiumInfo, chromiumEarning, diamondHandsInfo, diamondHandsEarning, diamondHandsMultiplier, OMCInfo, OMCEarning] = await Promise.all([
-        getMinerRewards(publicKeyToUse),
-        getLastMinerSubmission(publicKeyToUse),
-        getPoolChromiumReprocessingInfo(),
-        getLastChromiumReprocessingEarning(publicKeyToUse),
-        getPoolDiamondHandsReprocessingInfo(),
-        getLastDiamondHandsReprocessingEarning(publicKeyToUse),
-        getDiamondHandsMultiplier(publicKeyToUse),
-        getPoolOMCReprocessingInfo(),
-        getLastOMCReprocessingEarning(publicKeyToUse),
-      ])
-
-      setMinerRewards(rewards)
-      setLastSubmission(submission)
-      setChromiumDatesInfo(chromiumInfo)
-      setDiamondHandsDatesInfo(diamondHandsInfo)
-      setMinerRewardsReprocessChromium(chromiumEarning)
-      setMinerRewardsDiamondHands(diamondHandsEarning)
-      setMinerDiamondHandsMultiplier(diamondHandsMultiplier)
-      setOMCDatesInfo(OMCInfo)
-      setMinerRewardsOMC(OMCEarning)
-
-      const now = Date.now()
-      setLastFetchTime(now)
-      localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
-
-      updateRecentAddresses(publicKeyToUse)
-
-      toast({
-        title: 'Data Fetched',
-        description: 'Miner stats have been updated.',
-      })
-    } catch (error) {
-      console.error('Error fetching data:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to fetch miner stats. Please try again.',
-        variant: 'destructive',
-      })
-    }
-
-    setLoadingRewards(false)
   }
 
-  const getChallengeEarnings = async (time: number | string, key?: string) => {
-    let targetTime = 0
-    if (typeof time === 'string') {
-      targetTime = parseInt(time, 10)
-    } else {
-      targetTime = time
-    }
+  const getChallengeEarnings = async (key?: string) => {
     setChallengeEarnings([])
     setPoolSubmissionsCount(0)
     setPersonalSubmissionsCount(0)
@@ -230,10 +103,7 @@ export default function Page () {
     setLoadingSubmissions(true)
 
     try {
-      const submissionNow = new Date()
-      const submissionHoursAgo = new Date(submissionNow.getTime() - targetTime * 60 * 60 * 1000)
-
-      const earnings = await getMinerEarningsSubmissions(publicKeyToUse, submissionHoursAgo, submissionNow)
+      const earnings = await getMinerEarningsSubmissions(publicKeyToUse)
       console.log('earnings -->', earnings)
       setChallengeEarnings(earnings)
 
@@ -255,10 +125,10 @@ export default function Page () {
         setAvgPoolHash(0)
       }
 
-      const now = Date.now()
-      setLastFetchTime(now)
-      localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
-      updateRecentAddresses(publicKeyToUse)
+      // const now = Date.now()
+      // setLastFetchTime(now)
+      // localStorage.setItem('lastBalanceStatsFetchTime', now.toString())
+      // updateRecentAddresses(publicKeyToUse)
       toast({
         title: 'Data Fetched',
         description: 'Miner stats have been updated.',
@@ -292,118 +162,21 @@ export default function Page () {
             <div
               onMouseEnter={() => setIsPopoverOpen(true)}
               onMouseLeave={() => setIsPopoverOpen(false)}>
-              <Button onClick={() => fetchData()} disabled={cooldownRemaining > 0}>
+              <Button onClick={() => getChallengeEarnings()}>
                 <RefreshCw className="mr-2 h-4 w-4"/> Fetch Data
               </Button>
             </div>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-2">
+          {/* <PopoverContent className="w-auto p-2">
             {cooldownRemaining > 0 ? (
               <p>Refresh cooldown: {cooldownRemaining} seconds</p>
             ) : (
               <p>Click to refresh balance</p>
             )}
-          </PopoverContent>
+          </PopoverContent> */}
         </Popover>
       </div>
-      <Tabs defaultValue="rewards" className="w-full">
-        <TabsList className="grid w-full grid-col-1 sm:grid-cols-2 h-fit">
-          <TabsTrigger value="rewards">Rewards</TabsTrigger>
-          <TabsTrigger value="submissions">Submissions</TabsTrigger>
-        </TabsList>
-        <TabsContent value="rewards">
-          {loadingRewards && (
-            <Card>
-              <CardHeader>
-                <CardTitle>
-                  <div className="flex flex-row gap-2 items-center">
-                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
-                    <span>Loading...</span>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-            </Card>
-          )}
-          {!publicKey && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Search a public key to see rewards</CardTitle>
-              </CardHeader>
-            </Card>
-          )}
-          {minerRewards && (
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Miner Rewards</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Coal: {minerRewards.coal.toLocaleString()}</p>
-                <p>Ore: {minerRewards.ore.toLocaleString()}</p>
-                <p>Chromium: {minerRewards.chromium.toLocaleString()}</p>
-                <p>Ingot: {minerRewards.ingot.toLocaleString()}</p>
-                <p>Wood: {minerRewards.wood.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {lastSubmission && (
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Last Submission</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Difficulty: {lastSubmission.difficulty}</p>
-                <p>Mined at: {lastSubmission.created_at.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {chromiumDatesInfo && (
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Chromium Reprocessing Info</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Last Reprocess: {chromiumDatesInfo.last_reprocess.toLocaleString()}</p>
-                <p>Obtained: {minerRewardsReprocessChromium?.chromium ?? '-'} CHROMIUM</p>
-                <p>Next Reprocess: {chromiumDatesInfo.next_reprocess.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          )}
-
-          {diamondHandsDatesInfo && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Diamond Hands Info</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Last Reprocess: {diamondHandsDatesInfo.last_reprocess.toLocaleString()}</p>
-                <p>Main rewards: {minerRewardsDiamondHands?.coal ?? '-'} COAL
-                  - {minerRewardsDiamondHands?.ore ?? '-'} ORE</p>
-                <p>Extra rewards: {minerRewardsDiamondHands?.ingot ?? '-'} INGOT
-                  - {minerRewardsDiamondHands?.wood ?? '-'} WOOD</p>
-                <p>Miner multiplier: {minerDiamondHandsMultiplier.multiplier}x</p>
-                <p>Last Claim: {minerDiamondHandsMultiplier.lastClaim?.toLocaleString() ?? '-'}</p>
-                <p>Next Reprocess: {diamondHandsDatesInfo.next_reprocess.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          )}
-          {OMCDatesInfo && (
-            <Card>
-              <CardHeader>
-                <CardTitle>OMC NFT Reprocess Info</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p>Last Reprocess: {OMCDatesInfo.last_reprocess.toLocaleString()}</p>
-                <p>Main rewards: {minerRewardsOMC?.coal ?? '-'} COAL
-                  - {minerRewardsOMC?.ore ?? '-'} ORE</p>
-                <p>Extra rewards: {minerRewardsOMC?.ingot ?? '-'} INGOT
-                  - {minerRewardsOMC?.wood ?? '-'} WOOD</p>
-                <p>Next Reprocess: {OMCDatesInfo.next_reprocess.toLocaleString()}</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
+      <Tabs defaultValue="submissions" className="w-full">
         <TabsContent value="submissions">
           {!publicKey && (
             <Card>
@@ -415,16 +188,6 @@ export default function Page () {
           <Card>
             <CardHeader>
               <CardTitle>
-                <Select disabled={loadingSubmissions} onValueChange={getChallengeEarnings}>
-                  <SelectTrigger className="w-1/2 mb-2">
-                    <SelectValue placeholder="Submission time"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {submissionTimeWindoow.map(({ label, value }) => (
-                      <SelectItem key={value} value={value.toString()}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 Avg Personal
                 H/s: {avgPersonalHash.toLocaleString()} on {personalSubmissionsCount.toLocaleString()} submissions <br/>
                 Avg Pool

@@ -37,29 +37,29 @@ const data: MenuData[] = [
       },
     ],
   },
-  {
-    title: 'Getting started',
-    url: '/getting-started',
-    icon: Rocket,
-    items: [
-      {
-        title: 'Quick start',
-        url: '/getting-started/quick-start',
-      },
-      /*{
-        title: 'Advanced mining',
-        url: '/getting-started/advanced-mining',
-      },*/
-      {
-        title: 'HiveOS mining',
-        url: '/getting-started/hiveos-mining',
-      },
-      {
-        title: 'Mobile mining',
-        url: '/getting-started/mobile-mining',
-      },
-    ],
-  },
+  // {
+  //   title: 'Getting started',
+  //   url: '/getting-started',
+  //   icon: Rocket,
+  //   items: [
+  //     {
+  //       title: 'Quick start',
+  //       url: '/getting-started/quick-start',
+  //     },
+  //     /*{
+  //       title: 'Advanced mining',
+  //       url: '/getting-started/advanced-mining',
+  //     },*/
+  //     {
+  //       title: 'HiveOS mining',
+  //       url: '/getting-started/hiveos-mining',
+  //     },
+  //     {
+  //       title: 'Mobile mining',
+  //       url: '/getting-started/mobile-mining',
+  //     },
+  //   ],
+  // },
   {
     title: 'Info',
     url: '/info',
@@ -70,46 +70,34 @@ const data: MenuData[] = [
         url: '/info/stats',
       },
       {
-        title: 'Pool details',
+        title: 'Miner stats',
         url: '/info/pool-details',
       },
-      {
-        title: 'Token data',
-        url: '/info/tokens-data',
-      },
-      {
-        title: 'Team',
-        url: '/info/team',
-      },
-      {
-        title: 'Roadmap',
-        url: '/info/roadmap',
-      },
     ],
   },
-  {
-    title: 'Miner',
-    url: '/miner',
-    icon: GiMiner,
-    items: [
-      {
-        title: 'Balance & Stats',
-        url: '/miner/balance-stats',
-      },
-      {
-        title: 'Miner management/rewards',
-        url: '/miner/management-rewards',
-      },
-      {
-        title: 'Guild management/rewards',
-        url: '/miner/guild-management-rewards',
-      },
-      {
-        title: 'Web mining',
-        url: '/miner/web-mining',
-      },
-    ],
-  },
+  // {
+  //   title: 'Miner',
+  //   url: '/miner',
+  //   icon: GiMiner,
+  //   items: [
+  //     {
+  //       title: 'Balance & Stats',
+  //       url: '/miner/balance-stats',
+  //     },
+  //     {
+  //       title: 'Miner management/rewards',
+  //       url: '/miner/management-rewards',
+  //     },
+  //     {
+  //       title: 'Guild management/rewards',
+  //       url: '/miner/guild-management-rewards',
+  //     },
+  //     {
+  //       title: 'Web mining',
+  //       url: '/miner/web-mining',
+  //     },
+  //   ],
+  // },
   /*{
     title: 'Community',
     url: '/community',

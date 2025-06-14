@@ -3,9 +3,7 @@ import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
 import { getMinerRewardsNumeric, getServerTimestamp } from './poolUtils'
 import { WalletContextState } from '@solana/wallet-adapter-react'
 
-export const MINIMUM_CLAIM_AMOUNT_COAL = 5
-export const MINIMUM_CLAIM_AMOUNT_ORE = 0.05
-export const TOKEN_CREATION_AMOUNT_COAL = 4
+export const MINIMUM_CLAIM_AMOUNT = 0.02
 export const TOKEN_CREATION_AMOUNT_ORE = 0.02
 
 export async function claimRewards (
@@ -20,16 +18,14 @@ export async function claimRewards (
 
   console.log('Miner Unclaimed Rewards:', rewards)
 
-  if (rewards.coal < MINIMUM_CLAIM_AMOUNT_COAL && rewards.ore < MINIMUM_CLAIM_AMOUNT_ORE) {
+  if (rewards.bitz_decimal < MINIMUM_CLAIM_AMOUNT) {
     throw new Error('Insufficient rewards to claim')
   }
 
   // Convert rewards to grains (smallest unit)
-  const balanceGrainsCoal = Math.floor(rewards.coal * Math.pow(10, COAL_TOKEN_DECIMALS))
-  const balanceGrainsOre = Math.floor(rewards.ore * Math.pow(10, COAL_TOKEN_DECIMALS))
-  const balanceGrainsChromium = Math.floor(rewards.chromium * Math.pow(10, COAL_TOKEN_DECIMALS))
+  const balanceGrains = Math.floor(rewards.bitz_decimal * Math.pow(10, COAL_TOKEN_DECIMALS))
 
-  if (balanceGrainsCoal === 0 && balanceGrainsOre === 0) {
+  if (balanceGrains === 0) {
     throw new Error('Insufficient rewards to claim')
   }
 
@@ -42,7 +38,7 @@ export async function claimRewards (
   }
 
   // Sign the message
-  const signature = await wallet.signMessage(new TextEncoder().encode(`Claim: ${rewards.coal} COAL ${rewards.ore} ORE ${rewards.chromium} Chromium`))
+  const signature = await wallet.signMessage(new TextEncoder().encode(`Claim: ${rewards.bitz_decimal} Bitz`))
 
   // Encode the authorization
   // const auth = btoa(`${userPublicKey.toString()}:${Buffer.from(signature).toString('base64')}`)
@@ -56,9 +52,7 @@ export async function claimRewards (
         params: {
           timestamp,
           receiver_pubkey: userPublicKey.toString(),
-          amount_coal: balanceGrainsCoal,
-          amount_ore: balanceGrainsOre,
-          amount_chromium: balanceGrainsChromium,
+          amount: balanceGrains,
           username: userPublicKey.toString(),
           password: Buffer.from(signature).toString('base64')
         }

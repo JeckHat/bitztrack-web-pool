@@ -42,21 +42,18 @@ export type ReprocessInfoWithDate = {
 }
 
 export type FullMinerBalance = {
-  sol: number,
-  coal: number,
-  ore: number,
-  chromium: number,
-  ingot: number,
-  wood: number,
+  bitz: number,
+  bitz_decimal: number,
 }
 
 export type FullMinerBalanceString = {
-  sol: string,
-  coal: string,
-  ore: string,
-  chromium: string,
-  ingot: string,
-  wood: string,
+  bitz: string,
+  bitzDecimal: string,
+}
+
+export type ClaimableRewards = {
+  balance: number,
+  requires_ata_creation: boolean,
 }
 
 export type DiamondHandsMultiplier = {
@@ -74,30 +71,26 @@ export type SubmissionEarningMinerInfoApi = {
   miner_id: number,
   challenge_id: number,
   pubkey: string,
-  miner_amount_coal: number,
-  miner_amount_ore: number,
+  miner_amount: number,
   best_difficulty: number,
   miner_difficulty: number,
   best_challenge_hashpower: number,
   miner_hashpower: number,
   created_at: string,
-  total_rewards_earned_coal: number,
-  total_rewards_earned_ore: number
+  total_rewards_earned: number,
 }
 
 export type SubmissionEarningMinerInfo = {
   minerId: number,
   challengeId: number,
   pubkey: string,
-  minerAmountCoal: number,
-  minerAmountOre: number,
+  minerAmount: number,
   bestDifficulty: number,
   minerDifficulty: number,
   bestChallengeHashpower: number,
   minerHashpower: number,
   createdAt: Date,
-  totalRewardsEarnedCoal: number,
-  totalRewardsEarnedOre: number
+  totalRewardsEarned: number
 }
 
 export type ChallengeWithDifficulty = {

@@ -6,6 +6,7 @@ import {
   BalanceData,
   BlockhashData,
   ChallengeWithDifficulty,
+  ClaimableRewards,
   DiamondHandsMultiplier,
   DifficultyDistribution,
   FullMinerBalance,
@@ -157,7 +158,7 @@ export async function getMinerRewardsNumeric (publicKey: string): Promise<FullMi
     const response = await axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/rewards?pubkey=${publicKey}`)
     return response.data
   } catch {
-    return { coal: 0, ore: 0, chromium: 0, ingot: 0, wood: 0, sol: 0 }
+    return { bitz: 0, bitz_decimal: 0.0 }
   }
 }
 
@@ -182,12 +183,8 @@ export async function getMinerGuildStakeRewards24h (publicKey: string): Promise<
 export async function getMinerRewards (publicKey: string): Promise<FullMinerBalanceString> {
   const response = await getMinerRewardsNumeric(publicKey)
   return {
-    coal: response.coal?.toString() ?? '-',
-    ore: response.ore?.toString() ?? '-',
-    chromium: response.chromium?.toString() ?? '-',
-    ingot: response.ingot?.toString() ?? '-',
-    wood: response.wood?.toString() ?? '-',
-    sol: response.sol?.toString() ?? '-',
+    bitz: response.bitz?.toString() ?? '-',
+    bitzDecimal: response.bitz_decimal?.toString() ?? '-',
   }
 }
 
@@ -329,96 +326,6 @@ export async function getPoolOMCReprocessingInfo (): Promise<ReprocessInfoWithDa
   }
 }
 
-export async function getLastChromiumReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
-  try {
-    const cacheKey = `getLastChromiumReprocessingEarning-${publicKey}`
-    let targetCall = requestCache.get(cacheKey)
-    if (!targetCall) {
-      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-chromium?pubkey=${publicKey}`)
-      requestCache.set(cacheKey, targetCall)
-    }
-    const response = await targetCall
-    requestCache.delete(cacheKey)
-    return {
-      sol: response.data.sol?.toString() ?? '-',
-      coal: response.data.coal?.toString() ?? '-',
-      ore: response.data.ore?.toString() ?? '-',
-      chromium: response.data.chromium?.toString() ?? '-',
-      ingot: response.data.ingot?.toString() ?? '-',
-      wood: response.data.wood?.toString() ?? '-',
-    }
-  } catch {
-    return {
-      sol: '-',
-      coal: '-',
-      ore: '-',
-      chromium: '-',
-      ingot: '-',
-      wood: '-',
-    }
-  }
-}
-
-export async function getLastDiamondHandsReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
-  try {
-    const cacheKey = `getLastDiamondHandsReprocessingEarning-${publicKey}`
-    let targetCall = requestCache.get(cacheKey)
-    if (!targetCall) {
-      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-diamond-hands?pubkey=${publicKey}`)
-      requestCache.set(cacheKey, targetCall)
-    }
-    const response = await targetCall
-    requestCache.delete(cacheKey)
-    return {
-      sol: response.data.sol?.toString() ?? '-',
-      coal: response.data.coal?.toString() ?? '-',
-      ore: response.data.ore?.toString() ?? '-',
-      chromium: response.data.chromium?.toString() ?? '-',
-      ingot: response.data.ingot?.toString() ?? '-',
-      wood: response.data.wood?.toString() ?? '-',
-    }
-  } catch {
-    return {
-      sol: '-',
-      coal: '-',
-      ore: '-',
-      chromium: '-',
-      ingot: '-',
-      wood: '-',
-    }
-  }
-}
-
-export async function getLastOMCReprocessingEarning (publicKey: string): Promise<FullMinerBalanceString> {
-  try {
-    const cacheKey = `getLastOMCReprocessingEarning-${publicKey}`
-    let targetCall = requestCache.get(cacheKey)
-    if (!targetCall) {
-      targetCall = axios.get<FullMinerBalance>(`${POOL_SERVER}/miner/reprocess/last-omc?pubkey=${publicKey}`)
-      requestCache.set(cacheKey, targetCall)
-    }
-    const response = await targetCall
-    requestCache.delete(cacheKey)
-    return {
-      sol: response.data.sol?.toString() ?? '-',
-      coal: response.data.coal?.toString() ?? '-',
-      ore: response.data.ore?.toString() ?? '-',
-      chromium: response.data.chromium?.toString() ?? '-',
-      ingot: response.data.ingot?.toString() ?? '-',
-      wood: response.data.wood?.toString() ?? '-',
-    }
-  } catch {
-    return {
-      sol: '-',
-      coal: '-',
-      ore: '-',
-      chromium: '-',
-      ingot: '-',
-      wood: '-',
-    }
-  }
-}
-
 export async function getCurrentMinersCount (): Promise<string> {
   try {
     const response = await axios.get<number>(`${POOL_SERVER}/active-miners`)
@@ -464,14 +371,12 @@ export async function getPoolChallenges (): Promise<ChallengeWithDifficulty[]> {
   }
 }
 
-export async function getMinerEarningsSubmissions (pubkey: string, fromDate: Date, toDate: Date): Promise<SubmissionEarningMinerInfo[]> {
+export async function getMinerEarningsSubmissions (pubkey: string): Promise<SubmissionEarningMinerInfo[]> {
   const cacheKey = `getMinerEarningsSubmissions-${pubkey}`
   try {
-    console.log('fromDate:', fromDate.toISOString())
-    console.log('toDate:', toDate.toISOString())
     let targetCall = requestCache.get(cacheKey)
     if (!targetCall) {
-      targetCall = axios.get<SubmissionEarningMinerInfoApi[]>(`${POOL_SERVER}/miner/earnings-submissions?pubkey=${pubkey}&start_time=${Math.round(fromDate.getTime() / 1000)}&end_time=${Math.round(toDate.getTime() / 1000)}`)
+      targetCall = axios.get<SubmissionEarningMinerInfoApi[]>(`${POOL_SERVER}/miner/earnings-submissions-day?pubkey=${pubkey}`)
       requestCache.set(cacheKey, targetCall)
     }
     const response = await targetCall
@@ -482,16 +387,34 @@ export async function getMinerEarningsSubmissions (pubkey: string, fromDate: Dat
       bestDifficulty: x.best_difficulty,
       challengeId: x.challenge_id,
       createdAt: parseISO(x.created_at + '.000Z'),
-      minerAmountCoal: x.miner_amount_coal,
-      minerAmountOre: x.miner_amount_ore,
+      minerAmount: x.miner_amount,
       minerDifficulty: x.miner_difficulty,
       minerHashpower: x.miner_hashpower,
       pubkey: x.pubkey,
-      totalRewardsEarnedCoal: x.total_rewards_earned_coal,
-      totalRewardsEarnedOre: x.total_rewards_earned_ore,
+      totalRewardsEarned: x.total_rewards_earned
     }))
   } catch {
     requestCache.delete(cacheKey)
     return []
+  }
+}
+
+export async function onClaimableRewards (publicKey: string): Promise<ClaimableRewards> {
+  try {
+    const response = await axios.post(`${POOL_SERVER}/v2/confirmation-claim?pubkey=${publicKey}`)
+    return response.data
+  } catch {
+    return { balance: 0, requires_ata_creation: true }
+  }
+}
+
+
+export async function onClaimRewards (publicKey: string): Promise<string> {
+  try {
+    const response = await axios.post(`${POOL_SERVER}/v2/claim-direct?pubkey=${publicKey}`)
+    alert(JSON.stringify(response.data))
+    return response.data
+  } catch {
+    return "Claim Failed"
   }
 }

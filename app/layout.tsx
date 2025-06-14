@@ -26,9 +26,9 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'Excalivator mining pool',
-  description: 'Excalivator mining pool the first to mine and distribute COAL, ORE and CHROMIUM in a single process. Miner setup, pool stats and staking',
-  keywords: ['solana', 'crypto', 'mining', 'pool'],
+  title: 'BitzTrack Pool',
+  description: 'BitzTrack mining pool the first to mine and BITZ. Miner setup, pool stats and staking',
+  keywords: ['eclipse', 'crypto', 'mining', 'pool'],
   robots: 'index, follow',
 }
 

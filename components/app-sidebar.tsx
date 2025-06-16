@@ -67,11 +67,11 @@ const data: MenuData[] = [
     items: [
       {
         title: 'Pool stats',
-        url: '/info/stats',
+        url: '/info/pool',
       },
       {
         title: 'Miner stats',
-        url: '/info/pool-details',
+        url: '/info/miner',
       },
     ],
   },

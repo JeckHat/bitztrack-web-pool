@@ -20,7 +20,7 @@ import {
   SubmissionEarningMinerInfoApi,
   SubmissionWithDate
 } from '../pages/api/apiDataTypes'
-import { COAL_TOKEN_DECIMALS, POOL_SERVER } from './constants'
+import { COAL_TOKEN_DECIMALS, POOL_SERVER, POOL_SERVER_2 } from './constants'
 import { parseISO } from 'date-fns'
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -328,7 +328,7 @@ export async function getPoolOMCReprocessingInfo (): Promise<ReprocessInfoWithDa
 
 export async function getCurrentMinersCount (): Promise<string> {
   try {
-    const response = await axios.get<number>(`${POOL_SERVER}/active-miners`)
+    const response = await axios.get<number>(`${POOL_SERVER_2}/active-miners`)
     return response.data.toString()
   } catch {
     return '-'
@@ -337,7 +337,7 @@ export async function getCurrentMinersCount (): Promise<string> {
 
 export async function getAvgMinersCount24 (): Promise<string> {
   try {
-    const response = await axios.get<number>(`${POOL_SERVER}/active-miners-24h`)
+    const response = await axios.get<number>(`${POOL_SERVER_2}/active-miners-24h`)
     return response.data.toString()
   } catch {
     return '-'
@@ -383,6 +383,7 @@ export async function getMinerEarningsSubmissions (pubkey: string): Promise<Subm
     requestCache.delete(cacheKey)
     return response.data.map((x: SubmissionEarningMinerInfoApi) => ({
       minerId: x.miner_id,
+      workerName: x.worker_name,
       bestChallengeHashpower: x.best_challenge_hashpower,
       bestDifficulty: x.best_difficulty,
       challengeId: x.challenge_id,

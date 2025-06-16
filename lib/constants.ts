@@ -7,4 +7,5 @@ export const COAL_SOL_LP_MINT_ADDRESS: PublicKey = new PublicKey(process.env.NEX
 export const COAL_TOKEN_DECIMALS = parseInt(process.env.NEXT_PUBLIC_COAL_DECIMALS ?? '11')
 
 export const POOL_SERVER = process.env.NEXT_PUBLIC_POOL_SERVER ?? ''
+export const POOL_SERVER_2 = process.env.NEXT_PUBLIC_POOL_SERVER_2 ?? ''
 export const POOL_WSS_SERVER = process.env.NEXT_PUBLIC_POOL_WSS_SERVER ?? ''

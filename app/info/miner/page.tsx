@@ -14,11 +14,8 @@ import {
 } from '@/lib/poolUtils'
 import {
     ClaimableRewards,
-    DiamondHandsMultiplier,
     FullMinerBalanceString,
-    ReprocessInfoWithDate,
     SubmissionEarningMinerInfo,
-    SubmissionWithDate
 } from '@/pages/api/apiDataTypes'
 import { AutoComplete } from '../../../components/autocomplete'
 import { Popover, PopoverTrigger } from '../../../components/ui/popover'
@@ -33,23 +30,16 @@ export default function Page () {
     const [publicKey, setPublicKey] = useState('')
     const [minerRewards, setMinerRewards] = useState<FullMinerBalanceString | null>(null)
     const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards>()
-    const [lastSubmission, setLastSubmission] = useState<SubmissionWithDate | null>(null)
-    const [chromiumDatesInfo, setChromiumDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
-    const [diamondHandsDatesInfo, setDiamondHandsDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
-    const [OMCDatesInfo, setOMCDatesInfo] = useState<ReprocessInfoWithDate | null>(null)
     const [challengeEarnings, setChallengeEarnings] = useState<SubmissionEarningMinerInfo[]>([])
     const [avgPersonalHash, setAvgPersonalHash] = useState<number>(0)
     const [personalSubmissionsCount, setPersonalSubmissionsCount] = useState<number>(0)
     const [avgPoolHash, setAvgPoolHash] = useState<number>(0)
     const [poolSubmissionsCount, setPoolSubmissionsCount] = useState<number>(0)
-    const [lastFetchTime, setLastFetchTime] = useState<number | null>(null)
     const [fetchedData, setFetchedData] = useState(false)
-    const [cooldownRemaining, setCooldownRemaining] = useState(0)
     const { toast } = useToast()
     const [suggestions, setSuggestions] = useState<{ value: string; label: string }[]>([])
     const [isPopoverOpen, setIsPopoverOpen] = useState(false)
     const searchParams = useSearchParams()
-    const [loadingRewards, setLoadingRewards] = useState(false)
     const [loadingSubmissions, setLoadingSubmissions] = useState(false)
 
     useEffect(() => {

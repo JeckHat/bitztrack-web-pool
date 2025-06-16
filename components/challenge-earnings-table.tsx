@@ -40,6 +40,7 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
         <TableRow>
           <TableHead></TableHead>
           <TableHead>Challenge ID</TableHead>
+          <TableHead>Worker</TableHead>
           <TableHead>Date</TableHead>
           <TableHead>Bitz Earned</TableHead>
           <TableHead>Hashpower</TableHead>
@@ -67,6 +68,7 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
                   </Button>
                 </TableCell>
                 <TableCell>{challengeId}</TableCell>
+                <TableCell>[{entries.length}]</TableCell>
                 <TableCell>{latestDate.toLocaleString()}</TableCell>
                 <TableCell>{totalCoal.toLocaleString()}</TableCell>
                 <TableCell>{totalHashpower.toLocaleString()}</TableCell>
@@ -79,6 +81,7 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
                 <TableRow key={index}>
                   <TableCell></TableCell>
                   <TableCell>{entry.challengeId}</TableCell>
+                  <TableCell>{entry.workerName}</TableCell>
                   <TableCell>{entry.createdAt.toLocaleString()}</TableCell>
                   <TableCell>{formatLargeNumber(entry.minerAmount, COAL_TOKEN_DECIMALS).toLocaleString()}</TableCell>
                   <TableCell>{entry.minerHashpower.toLocaleString()}</TableCell>

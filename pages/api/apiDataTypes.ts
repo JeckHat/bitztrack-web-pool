@@ -69,6 +69,7 @@ export type AvgGuildRewards = {
 
 export type SubmissionEarningMinerInfoApi = {
   miner_id: number,
+  worker_name: string,
   challenge_id: number,
   pubkey: string,
   miner_amount: number,
@@ -82,6 +83,7 @@ export type SubmissionEarningMinerInfoApi = {
 
 export type SubmissionEarningMinerInfo = {
   minerId: number,
+  workerName: string,
   challengeId: number,
   pubkey: string,
   minerAmount: number,

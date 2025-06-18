@@ -29,7 +29,7 @@ const ChallengeEarningsTable: React.FC<ChallengeEarningsTableProps> = ({ data })
 
   function formatLargeNumber (num: number, decimalPlaces: number): string {
     const divisor = new bigDecimal('1' + '0'.repeat(decimalPlaces))
-    const bigNum = new bigDecimal(num.toString())
+    const bigNum = new bigDecimal(num?.toString() ?? "0")
     const result = bigNum.divide(divisor, decimalPlaces)
     return result.getValue()
   }
